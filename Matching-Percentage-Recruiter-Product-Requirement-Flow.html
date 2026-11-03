@@ -1,0 +1,3129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Product Requirement Flow</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<!-- All page content is the JSON in #flowdata. Edit it by hand, or use the Edit page button (password protected). -->
+
+<style id="page-style">/* Layout: sticky flow index on the left, one section per flow; each flow drawn on a dotted canvas,
+   main path down the left column, exits branching right. Group colour (Clubs green, Join Me orange,
+   shared/safety slate) marks success boxes and the flow's tag. */
+:root {
+  --bg: #f2f4f3;
+  --panel: #fafbfa;
+  --node: #ffffff;
+  --ink: #15201c;
+  --ink-2: #4d5b56;
+  --ink-3: #6f7d78;
+  --line: #8e9b96;
+  --line-soft: #d6ddd9;
+  --dot: #d3dad6;
+  --club: #1d7552;
+  --club-tint: #e2f1e9;
+  --join: #c2531a;
+  --join-tint: #fbe9dd;
+  --core: #335472;
+  --core-tint: #e3ebf3;
+  --focus: #335472;
+  --f-display: "Familjen Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Instrument Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --mainw: 340px;
+  --brw: 320px;
+  --gapx: 56px;
+  --pt: 44px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1513; --panel: #141b19; --node: #1a2320; --ink: #e5ece9; --ink-2: #a6b3ae; --ink-3: #8a9893;
+    --line: #6f7e78; --line-soft: #2b3632; --dot: #26302d;
+    --club: #4fc191; --club-tint: #16301f; --join: #f08c4e; --join-tint: #3a2216; --core: #8fb3d6; --core-tint: #1b2936;
+    --focus: #8fb3d6; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1513; --panel: #141b19; --node: #1a2320; --ink: #e5ece9; --ink-2: #a6b3ae; --ink-3: #8a9893;
+  --line: #6f7e78; --line-soft: #2b3632; --dot: #26302d;
+  --club: #4fc191; --club-tint: #16301f; --join: #f08c4e; --join-tint: #3a2216; --core: #8fb3d6; --core-tint: #1b2936;
+  --focus: #8fb3d6; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+a { color: inherit; }
+a:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
+.page { max-width: 1180px; margin: 0 auto; padding-block: 40px 96px; }
+
+/* header */
+.top { display: grid; gap: 12px; max-width: 760px; padding-bottom: 28px; border-bottom: 1px solid var(--line-soft); margin-bottom: 32px; }
+.eyebrow { margin: 0; font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+h1 { margin: 0; font: 700 clamp(36px, 6vw, 56px)/1 var(--f-display); letter-spacing: -.02em; text-wrap: balance; }
+.lede { margin: 0; max-width: 62ch; color: var(--ink-2); font-size: 16px; }
+.legend { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--ink-2); }
+.legend li { display: flex; align-items: center; gap: 8px; }
+.lg { display: inline-block; width: 22px; height: 14px; border-radius: 4px; border: 1.25px solid var(--line); background: var(--node); }
+.lg-dec { width: 16px; height: 16px; border-radius: 2px; transform: rotate(45deg) scale(.82); }
+.lg-ok { border: 2px solid var(--ink-2); background: var(--line-soft); }
+.lg-end { border-style: dashed; background: transparent; }
+
+/* layout */
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 40px; align-items: start; }
+.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); display: grid; gap: 20px; max-height: calc(100vh - 48px); overflow-y: auto; padding-bottom: 8px; }
+.nav-label { margin: 0 0 6px; font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--gc); }
+.toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.toc a { display: flex; gap: 10px; padding: 5px 8px; border-radius: 6px; text-decoration: none; font-size: 13.5px; color: var(--ink-2); line-height: 1.35; }
+.toc a:hover { background: var(--panel); color: var(--ink); }
+.toc .n { font: 500 12px/1.6 var(--f-mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+.g-club { --gc: var(--club); --gt: var(--club-tint); }
+.g-join { --gc: var(--join); --gt: var(--join-tint); }
+.g-core { --gc: var(--core); --gt: var(--core-tint); }
+
+/* flow sections */
+.flows { display: grid; gap: 56px; min-width: 0; }
+.flow { display: grid; gap: 16px; min-width: 0; scroll-margin-top: 24px; }
+.flow-head { display: grid; gap: 6px; }
+.flow-id { display: flex; align-items: center; gap: 10px; font: 500 12px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; }
+.flow-id .num { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.flow-id .grp { color: var(--gc); padding: 4px 7px; border-radius: 4px; background: var(--gt); }
+h2 { margin: 0; font: 600 28px/1.15 var(--f-display); letter-spacing: -.01em; text-wrap: balance; }
+.finding, .part-finding { margin: 0; color: var(--ink-2); max-width: 64ch; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 24px; margin: 4px 0 0; font-size: 13px; }
+.meta div { display: flex; gap: 8px; }
+.meta dt { color: var(--ink-3); font-family: var(--f-mono); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; padding-top: 1px; }
+.meta dd { margin: 0; color: var(--ink); }
+.part { display: grid; gap: 6px; margin-top: 8px; }
+.part h3 { margin: 0; font: 600 18px/1.2 var(--f-display); }
+.part .canvas { margin-top: 8px; }
+
+/* canvas */
+.canvas {
+  border: 1px solid var(--line-soft); border-radius: 12px; padding: 28px 24px;
+  background-color: var(--panel);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+  background-size: 16px 16px;
+  overflow-x: auto;
+}
+.chart { --spine: 1.5px solid var(--line); width: max-content; max-width: 100%; }
+
+.row { display: grid; grid-template-columns: var(--mainw) auto; --pt: 44px; }
+.row.first { --pt: 0px; }
+.main, .branches { padding-top: var(--pt); display: flex; flex-direction: column; justify-content: center; position: relative; }
+.main { align-items: center; }
+
+/* main spine */
+.main::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: var(--spine); transform: translateX(-.75px); }
+.row.first .main::before { top: 50%; }
+.row.last .main::before { bottom: calc(50% - var(--pt) / 2); }
+.row.first.last .main::before { display: none; }
+.row.has-br .main::after { content: ""; position: absolute; left: 50%; right: 0; top: calc(50% + var(--pt) / 2); border-top: var(--spine); }
+
+.nwrap { position: relative; z-index: 1; width: 100%; display: flex; justify-content: center; }
+.row:not(.first) .nwrap::before {
+  content: ""; position: absolute; top: -7px; left: 50%; width: 10px; height: 7px; transform: translateX(-50%);
+  background: var(--line); clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+.inlab { position: absolute; bottom: 100%; left: calc(50% + 10px); margin-bottom: 12px; font: 500 11.5px/1 var(--f-mono); color: var(--ink-3); white-space: nowrap; }
+
+/* nodes */
+.node { width: 100%; background: var(--node); border: 1.25px solid var(--line); border-radius: 10px; padding: 11px 15px 12px; display: grid; gap: 2px; text-align: left; }
+.node strong { font: 600 14px/1.3 var(--f-body); color: var(--ink); }
+.node .sub { font-size: 12.5px; line-height: 1.4; color: var(--ink-2); }
+.node.ok { border: 2px solid var(--gc); background: var(--gt); }
+.node.end { border-style: dashed; border-color: var(--line); background: var(--panel); }
+.node.end strong { color: var(--ink-2); }
+.node:has(strong:only-child) { text-align: center; padding-block: 13px; }
+
+.node.dec {
+  width: 252px; height: 84px; padding: 0 44px; border: 0; border-radius: 0; background: var(--line);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); display: flex; align-items: center; justify-content: center; position: relative;
+}
+.node.dec::before { content: ""; position: absolute; inset: 1.6px 2.4px; background: var(--node); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.node.dec span { position: relative; text-align: center; font: 500 13.5px/1.25 var(--f-body); color: var(--ink); text-wrap: balance; }
+
+/* branches */
+.branches { padding-left: var(--gapx); width: calc(var(--brw) + var(--gapx)); }
+.branch { position: relative; padding-block: 6px; display: flex; }
+.branch::after { content: ""; position: absolute; top: 50%; left: calc(-1 * var(--gapx)); width: var(--gapx); border-top: var(--spine); }
+.ah { position: absolute; top: 50%; left: -8px; width: 8px; height: 10px; transform: translateY(-50%); background: var(--line); clip-path: polygon(0 0, 100% 50%, 0 100%); z-index: 1; }
+.row.multi .branch::after { left: -28px; width: 28px; }
+.row.multi .branch::before { content: ""; position: absolute; left: -28px; top: 0; bottom: 0; border-left: var(--spine); transform: translateX(-.75px); }
+.row.multi .branch:first-child::before { top: 50%; }
+.row.multi .branch:last-child::before { bottom: 50%; }
+.row.multi .branches::after { content: ""; position: absolute; left: 0; width: 28px; top: calc(50% + var(--pt) / 2); border-top: var(--spine); }
+.blab { position: absolute; left: calc(-1 * var(--gapx) + 6px); top: calc(50% - 20px); font: 500 11.5px/1 var(--f-mono); color: var(--ink-3); background: var(--panel); padding: 0 3px; }
+
+/* tablet: index on top */
+@media (max-width: 1060px) {
+  .layout { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .toc { position: static; max-height: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px 24px; overflow: visible; }
+}
+
+/* phone: one column, exits listed under their decision */
+@media (max-width: 720px) {
+  .page { padding-block: 28px 72px; }
+  .toc { grid-template-columns: 1fr 1fr; }
+  h2 { font-size: 24px; }
+  .canvas { padding: 20px 14px 20px 30px; overflow-x: visible; }
+  .chart { width: 100%; }
+  .row { display: block; --pt: 30px; }
+  .main { align-items: stretch; }
+  .main::before { left: -16px; transform: none; }
+  .row.first .main::before { top: 50%; }
+  .row.last .main::before { bottom: calc(50% - var(--pt) / 2); }
+  .row.has-br .main::after { display: none; }
+  .nwrap { justify-content: flex-start; }
+  .nwrap::after { content: ""; position: absolute; left: -16px; width: 16px; top: 50%; border-top: var(--spine); }
+  .row:not(.first) .nwrap::before { top: 50%; left: -7px; width: 7px; height: 10px; transform: translateY(-50%); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+  .inlab { position: static; display: block; margin: 0 0 6px; }
+  .nwrap:has(.inlab) { flex-direction: column; }
+  .nwrap:has(.inlab)::after, .row:not(.first) .nwrap:has(.inlab)::before { top: calc(50% + 9px); }
+  .node.dec { width: 100%; max-width: 300px; height: 76px; }
+  .branches { width: auto; padding: 10px 0 0 22px; margin-left: 2px; position: relative; }
+  .branches::before { content: ""; position: absolute; left: 6px; top: 0; bottom: 18px; border-left: 1.5px dashed var(--line); }
+  .row:not(.last) .branches::after { content: ""; position: absolute; left: -16px; top: 0; bottom: 0; border-left: var(--spine); transform: none; width: 0; }
+  .branch, .row.multi .branch { padding-block: 4px; flex-direction: column; }
+  .branch::after, .row.multi .branch::after, .row.multi .branch::before, .ah { display: none; }
+  .row.multi .branches::after { left: -16px; top: 0; width: 0; border-top: 0; }
+  .blab { position: static; padding: 0; margin: 0 0 4px; background: none; }
+  .blab::before { content: "if "; }
+}
+
+/* ---- editable flows ---- */
+[hidden] { display: none !important; }
+.node .sub { white-space: pre-line; }
+body:not(.editing) [data-k]:empty { display: none; }
+body:not(.editing) .node .sub:empty { display: none; }
+.doc-count { margin: 0; font: 500 12px/1 var(--f-mono); color: var(--ink-3); letter-spacing: .06em; text-transform: uppercase; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.edfab { position: fixed; z-index: 30; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  border: 0; border-radius: 999px; padding: 12px 18px; background: var(--ink); color: var(--bg); font: 600 14px/1 var(--f-body); box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .5); display: inline-flex; gap: 8px; align-items: center; cursor: pointer; }
+.edfab svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+body.editing { padding-bottom: 120px; }
+body.editing [contenteditable] { border-radius: 4px; outline: 1px dashed transparent; outline-offset: 2px; cursor: text; min-width: 1ch; }
+body.editing [contenteditable]:hover { outline-color: var(--line); }
+body.editing [contenteditable]:focus { outline: 2px solid var(--focus); background: var(--panel); }
+body.editing [contenteditable]:empty::before { content: attr(data-ph); color: var(--ink-3); font-style: italic; font-weight: 400; }
+body.editing .node { cursor: pointer; }
+body.editing .node.is-sel { box-shadow: 0 0 0 3px var(--focus); }
+body.editing .node.dec.is-sel { background: var(--focus); }
+body.editing .inlab, body.editing .blab { min-width: 3ch; }
+body.editing .blab { background: var(--panel); }
+
+.ed-flow { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-left: auto; text-transform: none; letter-spacing: 0; }
+.ed-flow select, .ed-flow button, .ed-mini, .edbar button { font: 500 12.5px/1 var(--f-body); color: var(--ink); background: var(--panel); border: 1px solid var(--line-soft); border-radius: 7px; padding: 6px 9px; cursor: pointer; }
+.ed-flow button:disabled, .edbar button:disabled { opacity: .4; cursor: not-allowed; }
+.danger { color: #c2410c !important; }
+.flow-id { flex-wrap: wrap; }
+.ed-mini { justify-self: start; }
+.ed-add { font: 600 14px/1 var(--f-body); color: var(--ink-2); background: transparent; border: 1.5px dashed var(--line); border-radius: 10px; padding: 14px 18px; cursor: pointer; width: 100%; max-width: 340px; }
+.ed-add.big { max-width: none; padding: 20px; }
+.ed-add:hover { color: var(--ink); border-color: var(--ink-3); }
+
+.edbar { position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; background: var(--panel); border-top: 1px solid var(--line-soft); box-shadow: 0 -10px 30px -18px rgba(0, 0, 0, .35);
+  display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between;
+  padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.edbar[hidden] { display: none !important; }
+.ed-ctx, .ed-right { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; }
+.ed-hint, .ed-status { font-size: 13px; color: var(--ink-2); }
+.ed-status { margin-right: 6px; }
+.ed-label { font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-right: 4px; }
+.edbar .seg { display: inline-flex; border: 1px solid var(--line-soft); border-radius: 8px; overflow: hidden; }
+.edbar .seg button { border: 0; border-radius: 0; border-right: 1px solid var(--line-soft); }
+.edbar .seg button:last-child { border-right: 0; }
+.edbar .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.edbar button.primary, .modal button.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.modal { position: fixed; inset: 0; z-index: 40; background: rgba(10, 16, 14, .45); display: grid; place-items: center; padding: 16px; }
+.modal-card { width: min(560px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; background: var(--bg); color: var(--ink); border-radius: 14px; padding: 20px; display: grid; gap: 12px; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .5); }
+.modal-card h3 { margin: 0; font: 600 20px/1.2 var(--f-display); }
+.modal-body { display: grid; gap: 10px; font-size: 14px; color: var(--ink-2); }
+.modal-body p { margin: 0; }
+.modal-body .small { font-size: 12.5px; color: var(--ink-3); }
+.modal-body .err { color: #c2410c; }
+.modal-body .lbl { font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.modal-body textarea { width: 100%; font: 12px/1.4 var(--f-mono); color: var(--ink); background: var(--panel); border: 1px solid var(--line-soft); border-radius: 8px; padding: 10px; resize: vertical; }
+.steps-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.modal-btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.modal-btns button { font: 600 13.5px/1 var(--f-body); padding: 10px 14px; border-radius: 9px; border: 1px solid var(--line-soft); background: var(--panel); color: var(--ink); cursor: pointer; }
+.modal-btns .danger-fill { background: #c2410c; border-color: #c2410c; color: #fff; }
+.ed-toast { position: fixed; z-index: 50; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 10px; font: 600 13.5px/1.2 var(--f-body); max-width: calc(100% - 32px); }
+.ed-toast[hidden] { display: none; }
+@media (max-width: 720px) { .ed-flow { margin-left: 0; width: 100%; } body.editing { padding-bottom: 200px; } }
+
+/* ---- overview: description, scope, KPIs, metrics ---- */
+.g-ov { --gc: var(--ink-2); --gt: var(--line-soft); }
+.doc-meta { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font: 500 12px/1 var(--f-mono); color: var(--ink-3); letter-spacing: .06em; text-transform: uppercase; }
+.doc-meta .doc-count { display: inline; }
+.role { margin: 4px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line-soft); background: var(--panel); font-size: 13.5px; color: var(--ink-2); max-width: 760px; }
+.role b { font-weight: 600; color: var(--ink); }
+.role .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); align-self: center; }
+.role.is-pm .dot { background: var(--club); }
+.role.is-view .dot { background: var(--core); }
+
+.ov { display: grid; gap: 18px; min-width: 0; scroll-margin-top: 24px; }
+.ov-head { display: grid; gap: 6px; }
+.ov-eyebrow { margin: 0; font: 500 12px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.ov-lede { margin: 0; color: var(--ink-2); max-width: 64ch; }
+.sec-split { margin: 8px 0 -32px; padding-top: 28px; border-top: 1px solid var(--line-soft); font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); scroll-margin-top: 24px; }
+
+/* description */
+.desc { margin: 0; display: grid; border-top: 1px solid var(--line-soft); }
+.desc-row { display: grid; grid-template-columns: 170px minmax(0, 1fr) auto; gap: 6px 24px; padding: 14px 0; border-bottom: 1px solid var(--line-soft); align-items: start; }
+.desc dt { font: 600 14px/1.5 var(--f-body); color: var(--ink); }
+.desc dd { margin: 0; color: var(--ink-2); max-width: 70ch; }
+
+/* scope */
+.scope-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.scope-col { border: 1px solid var(--line-soft); border-radius: 12px; background: var(--panel); padding: 16px 18px; display: grid; gap: 10px; align-content: start; }
+.scope-col h3 { margin: 0; font: 600 16px/1.2 var(--f-display); display: flex; align-items: center; gap: 8px; }
+.scope-col .cnt { font: 500 11.5px/1 var(--f-mono); color: var(--ink-3); padding: 3px 6px; border-radius: 4px; background: var(--bg); }
+.scope-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.scope-col li { display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 10px; align-items: start; font-size: 14px; line-height: 1.45; }
+.scope-col li i { width: 16px; height: 16px; margin-top: 2px; border-radius: 50%; position: relative; }
+.scope-col.in li i { background: var(--club-tint); box-shadow: inset 0 0 0 1.5px var(--club); }
+.scope-col.in li i::after { content: ""; position: absolute; left: 5px; top: 3px; width: 4px; height: 7px; border: solid var(--club); border-width: 0 1.75px 1.75px 0; transform: rotate(45deg); }
+.scope-col.out li { color: var(--ink-2); }
+.scope-col.out li i { box-shadow: inset 0 0 0 1.5px var(--line); }
+.scope-col.out li i::after { content: ""; position: absolute; left: 4px; right: 4px; top: 7.25px; border-top: 1.5px solid var(--line); }
+
+/* KPIs */
+.north { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px 20px; align-items: center; padding: 18px 20px; border-radius: 12px; background: var(--ink); color: var(--bg); }
+.north-tag { margin: 0; font: 500 11px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
+.north-main { display: grid; gap: 2px; min-width: 0; }
+.north-main strong { font: 600 19px/1.25 var(--f-display); }
+.north-main p { margin: 0; font-size: 13.5px; opacity: .82; }
+.north-target { margin: 0; font: 700 22px/1.1 var(--f-display); text-align: right; }
+body.editing .north [contenteditable]:focus { background: transparent; outline-color: var(--bg); }
+body.editing .north [contenteditable]:empty::before { color: inherit; opacity: .6; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.kpi { border: 1px solid var(--line-soft); border-radius: 12px; background: var(--node); padding: 14px 16px 16px; display: grid; gap: 6px; align-content: start; }
+.kpi-top { display: flex; align-items: start; justify-content: space-between; gap: 8px; }
+.kpi-target { margin: 0; font: 700 28px/1.05 var(--f-display); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.kpi h3 { margin: 0; font: 600 15px/1.3 var(--f-body); }
+.kpi-def { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink-2); }
+.kpi-when { margin: 4px 0 0; justify-self: start; font: 500 11.5px/1 var(--f-mono); color: var(--ink-3); text-transform: uppercase; letter-spacing: .05em; }
+.kpis .ov-add { max-width: none; min-height: 120px; }
+
+/* metrics */
+.mwrap { border: 1px solid var(--line-soft); border-radius: 12px; overflow-x: auto; background: var(--node); }
+.mtable { width: 100%; border-collapse: collapse; font-size: 13.5px; line-height: 1.4; }
+.mtable th, .mtable td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line-soft); }
+.mtable thead th { font: 500 11px/1.2 var(--f-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); background: var(--panel); position: sticky; top: 0; }
+.mtable tbody tr:last-child > * { border-bottom: 0; }
+.mtable tbody th { font-weight: 600; color: var(--ink); min-width: 150px; }
+.mtable td { color: var(--ink-2); }
+.mtable td:nth-child(3) { min-width: 220px; }
+.mtable .ev { font: 12px/1.5 var(--f-mono); color: var(--ink-2); min-width: 190px; word-break: break-word; }
+.mtable .num { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 500; }
+.mtable .cur { color: var(--ink-2); }
+.mtable .rm { width: 36px; }
+.nil { color: var(--ink-3); }
+.area { display: inline-block; padding: 3px 7px; border-radius: 4px; font: 500 11.5px/1.2 var(--f-mono); white-space: nowrap; }
+.a-club { color: var(--club); background: var(--club-tint); }
+.a-join { color: var(--join); background: var(--join-tint); }
+.a-core { color: var(--core); background: var(--core-tint); }
+
+/* edit controls in the overview */
+.ov-del { border: 1px solid var(--line-soft); background: var(--panel); color: var(--ink-3); width: 26px; height: 26px; border-radius: 7px; font: 500 16px/1 var(--f-body); cursor: pointer; display: inline-grid; place-items: center; flex: none; }
+.ov-del:hover { color: #c2410c; border-color: #c2410c; }
+.ov-add { max-width: none; padding: 10px 14px; font-size: 13px; justify-self: start; width: auto; }
+.north .ov-del { background: transparent; }
+body.editing .mtable [contenteditable] { display: block; min-height: 1.4em; }
+body.editing .mtable .area[contenteditable] { display: inline-block; min-width: 6ch; }
+
+@media (max-width: 720px) {
+  .desc-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .desc-row dd { grid-column: 1 / -1; }
+  .scope-grid { grid-template-columns: minmax(0, 1fr); }
+  .north { grid-template-columns: minmax(0, 1fr); }
+  .north-target { text-align: left; }
+  .kpis { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .kpi-target { font-size: 24px; }
+  .mwrap { border: 0; background: transparent; overflow: visible; }
+  .mtable, .mtable tbody { display: block; }
+  .mtable thead { display: none; }
+  .mtable tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 14px; padding: 14px; margin-bottom: 10px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--node); }
+  .mtable th, .mtable td { display: block; padding: 0; border: 0; min-width: 0 !important; }
+  .mtable tbody th, .mtable td:nth-child(1), .mtable td:nth-child(3), .mtable .ev { grid-column: 1 / -1; }
+  .mtable tbody th { order: -1; font-size: 15px; }
+  .mtable td:nth-child(1) { order: -2; }
+  .mtable .ev::before, .mtable .num::before { content: attr(data-l); display: block; margin-bottom: 2px; font: 500 10.5px/1.2 var(--f-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+  .mtable .rm { grid-column: 1 / -1; width: auto; }
+}
+@media (max-width: 420px) { .kpis { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---- edit lock, groups ---- */
+.role-btn { margin-left: auto; font: 500 12.5px/1 var(--f-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line-soft); border-radius: 7px; padding: 6px 10px; cursor: pointer; }
+.ed-input { width: 100%; font: 15px/1.3 var(--f-body); color: var(--ink); background: var(--panel); border: 1px solid var(--line-soft); border-radius: 8px; padding: 10px 12px; }
+.ed-input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+.grp-list { display: grid; gap: 8px; }
+.grp-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 8px; align-items: center; }
+.grp-row select, .grp-row button { font: 500 13px/1 var(--f-body); color: var(--ink); background: var(--panel); border: 1px solid var(--line-soft); border-radius: 8px; padding: 9px 10px; cursor: pointer; }
+.grp-row button:disabled { opacity: .4; cursor: not-allowed; }
+.grp-row .small { white-space: nowrap; }
+@media (max-width: 480px) { .grp-row { grid-template-columns: minmax(0, 1fr) auto auto; } .grp-row .small { display: none; } }
+</style>
+<script type="application/json" id="flowdata">
+{
+  "id": "bdjobs-recruiter-matching-percentage-v1",
+  "file": "Matching-Percentage-Recruiter-Product-Requirement-Flow",
+  "template": false,
+  "eyebrow": "Bdjobs · Recruiter Panel · Phase 1 requirements",
+  "title": "Matching Percentage",
+  "lede": "Help recruiters compare applicants using 60 fixed AI marks and 40 rule-based manual marks. Capture the CV and JD at application time, calculate manual matches, process AI in the next Bangladesh-time window, and reveal the complete percentage only when both calculations finish.",
+  "groups": [
+    {
+      "id": "recruiter",
+      "label": "Recruiter review",
+      "color": "core"
+    },
+    {
+      "id": "manual",
+      "label": "Scoring & manual rules",
+      "color": "club"
+    },
+    {
+      "id": "ai",
+      "label": "AI matching & processing",
+      "color": "join"
+    }
+  ],
+  "overview": {
+    "ledes": {
+      "desc": "Converted from the revised recruiter PRD dated 02 November 2026. Detailed rules and acceptance criteria govern where the source contains conflicting summaries; decisions and draft proposals are identified below.",
+      "scope": "Phase 1 behavior that QA can verify. Release timing remains unassigned pending product decisions and QA sign-off.",
+      "kpis": "DRAFT measurement plan: the source PRD specifies no business KPIs, baselines or numeric operational targets. Every target below requires product and engineering agreement; day counts start at launch.",
+      "metrics": "DRAFT analytics contract: confirm these snake_case events, definitions and properties with development before build. Current values are intentionally empty. Measure rule correctness without sending raw CV/JD text to analytics."
+    },
+    "desc": [
+      {
+        "label": "What it is",
+        "text": "A matching percentage and eight-row score breakdown in Bdjobs Recruiter Panel / Applicant Processing. Three AI display components contribute 60 points; five manual criteria contribute 40. Final score = AI earned points + manual earned points, capped at 100."
+      },
+      {
+        "label": "Problem",
+        "text": "Recruiters need to compare supplied applicant evidence with job requirements while keeping qualitative relevance and structured field rules transparent. Legacy Skills, Industry and Experience manual scores must not be added again after AI replaces them. The PRD provides no quantified baseline."
+      },
+      {
+        "label": "Who it's for",
+        "text": "Recruiters reviewing applicants for Standard Listing, Premium Listing, Premium Plus and Hot Jobs. Candidate CVs, recruiter requirements and hidden Content Team education requirements supply scoring inputs. This deliverable covers the recruiter-side feature only."
+      },
+      {
+        "label": "Why now",
+        "text": "The 02 November 2026 revision defines the AI 60 / manual 40 model, manual redistribution, application-time score freezing and complete-score-only display. No business deadline or launch date is supplied."
+      },
+      {
+        "label": "How it works",
+        "text": "Freeze application-time CV and JD data. Calculate eligible manual fields at full precision, redistributing only missing employer-defined manual requirements. Queue AI in the subsequent 06:00–18:00 or 18:00–06:00 Asia/Dhaka window. While either calculation is incomplete, hide all scores and show the generation message. After both finish, display the final breakdown and apply legacy matching/boost ranking."
+      },
+      {
+        "label": "Scoring contract",
+        "text": "AI: Skills & Responsibilities 40; Industry 5; Relevant Experience 10; Job Title 5. The last two appear together as Job Title and Experience 15. Manual base: Education 15; Salary 10; Location 5; Age 5; Gender 5. Missing applicant evidence earns 0 where evidence is required; it never causes redistribution. Explicit exceptions: nonmandatory experience earns 10 and Gender Any/unspecified earns its full allocation."
+      },
+      {
+        "label": "Dependencies",
+        "text": "Application-time CV/JD capture; structured profile and job fields; hidden Content Team education source and recruiter precedence; AI CV/JD evaluator; twice-daily Bangladesh-time batch scheduler; existing salary alert, Applicant Summary View, Matching Panel, boosted ranking and tie-breakers; AI branding asset. Linked Job Seeker PRD and AI Prompt Logics documents were referenced in the source but not supplied as separate inputs; their contents are unverified."
+      },
+      {
+        "label": "Ownership & release",
+        "text": "Product Owner: Mohammad Sanaullah Rabby. Design and Engineering ownership: confirm revised assignments. Source status: revised draft with implementation decisions identified. Phase 1 and Phase 2 are proposed; release requires outstanding business decisions and QA sign-off."
+      },
+      {
+        "label": "Source conflict resolved",
+        "text": "INTERPRETATION: EMP-R08 §8.2 and AC-20–23/28 override the introduction, feature summary, objective and release-log references to provisional manual-only percentages. Show no matching percentage and no manual or AI scores until both calculations complete. EMP-R11 / AC-27 override the phrase new/changed applications: post-application CV/JD edits do not enqueue recalculation for an existing application."
+      },
+      {
+        "label": "Open decision · industry",
+        "text": "DRAFT working interpretation from EMP-R02: if the JD contains no usable industry/domain requirement, award 0/5 and do not redistribute. Product sign-off is required. Missing CV industry evidence already scores 0/5."
+      },
+      {
+        "label": "Open decision · salary",
+        "text": "The source does not define maximum-only salary scoring, Negotiable, malformed or contradictory salary ranges. Confirm how these become usable/absent requirements and which existing alert is used. The flows identify these cases without inventing a score."
+      },
+      {
+        "label": "Open decision · ranking",
+        "text": "Retain the existing boost implementation. Confirm the 80% overlap between the stated 60%–80% and 80%–100% slabs, treatment of fractional scores between 80% and 81%, the lower slab comparator and mixed pending/final ordering. Nonboosted equal-score tie-breakers are not specified. Do not invent a new ordering."
+      },
+      {
+        "label": "Open decision · operations",
+        "text": "Confirm exact 06:00/18:00 cutoff ownership, completion SLA, retry/backoff and recovery alerts. The next-window assignment is specified; an exact completion time is not. Define invalid-source and zero-eligible-manual-budget recovery if such states can occur; Gender unspecified normally remains eligible and full-scoring. DRAFT: keep an application pending if its required calculation cannot be completed."
+      },
+      {
+        "label": "Draft proposals",
+        "text": "All KPI targets, event names and event-property suggestions are proposals. No adoption baseline is assumed. Operational validation/recovery gates are draft where the PRD provides no behavior. No new user-facing phase, notification or recalculation feature is added."
+      },
+      {
+        "label": "Acceptance coverage",
+        "text": "AC-01–08 → flows 13–18; AC-09–14 → flows 06–07; AC-15–16 → flow 08; AC-17 → flow 09; AC-18 → flow 10; AC-19 → flow 11; AC-20–22 → flows 02, 12 and 19; AC-23 → flow 20; AC-24–25 → flows 02–03; AC-26 → Phase 2 scope only; AC-27 → flows 01/05; AC-28–29 → flow 04."
+      }
+    ],
+    "scope": {
+      "in": [
+        "Freeze the candidate CV and JD versions at application time; use those versions in Applicant Summary View and Job Matching Panel. Later CV/JD edits never recalculate that application.",
+        "Keep AI caps at 40 + 5 + 10 + 5 = 60 and manual base weights at 15 + 10 + 5 + 5 + 5 = 40. Display eight criterion rows by combining title and experience.",
+        "Apply Skills & Responsibilities evidence cases A–E, binary Industry 0/5 and independent title 0–5 scoring based only on supplied CV/JD information.",
+        "Normalize experience bounds and months; deduplicate overlapping periods; use the exact inclusive tier boundaries and halve experience only for explicitly unrelated domains.",
+        "Redistribute missing employer-defined manual requirements proportionally within 40 points; redistribute missing education subfields equally inside effective Education weight. Preserve Any/unspecified Gender as a full-point exception.",
+        "Use recruiter education before hidden Content Team education; apply salary 20% tolerances, district-level location OR, one-year age tolerance and original gender rules.",
+        "Assign AI work to the subsequent Bangladesh-time processing window: 06:00–18:00 or 18:00–06:00. Publish results after successful processing, with no fixed 24-hour wait.",
+        "While AI or manual calculation is incomplete, show “Being Generated; scores will be shown once generated.” Hide all scores and percentages. AI failure retains this state until success.",
+        "Show matching pop-up only for Standard Listing, Premium Listing, Premium Plus and Hot Jobs; include Powered by bdjobs AI branding and “AI can make mistakes.”",
+        "Retain Criteria / Percentage / Job Requirement / Applicant Info / Match columns; original manual highlights; See More / See Less above 45 characters; hidden Age under Other.",
+        "After both calculations finish, show the complete breakdown and final percentage, then apply existing descending-score ranking, boosted slabs and boosted tie-breakers."
+      ],
+      "out": [
+        "Detailed AI score explanations inside the Phase 1 pop-up; concise evidence-based explanations are proposed for Phase 2 (AC-26).",
+        "A temporary manual-only percentage, an incomplete total, or any visible criterion score before both AI and manual calculations finish.",
+        "Recalculation of an existing application following a candidate CV update or employer JD edit.",
+        "New matching pop-ups or scoring/ranking redesign for service types other than the four eligible listings.",
+        "Redistribution between AI dimensions, from AI into manual criteria, or because a candidate fact is missing; double-counting legacy manual Skills, Industry or Experience.",
+        "Legacy experience rounding tolerances or the superseded 20-point manual experience model.",
+        "A redesigned boost algorithm, a fixed 24-hour generation promise, or an invented batch completion SLA.",
+        "Changes to the separate Job Seeker-side matching product."
+      ]
+    },
+    "north": {
+      "name": "Final-score review coverage",
+      "def": "DRAFT: eligible jobs opened in Applicant Processing during the first 30 launch days that have at least one completed application score and at least one recruiter final-breakdown view, divided by all opened eligible jobs with at least one completed score in that period. Count each job once.",
+      "target": "DRAFT ≥60% by day 30"
+    },
+    "kpis": [
+      {
+        "name": "Recruiter adoption",
+        "target": "DRAFT ≥50%",
+        "def": "Distinct recruiters who open a final breakdown / distinct recruiters who open eligible Applicant Processing with at least one completed application score in the same period.",
+        "when": "First 30 launch days"
+      },
+      {
+        "name": "Next-window completion",
+        "target": "DRAFT ≥99%",
+        "def": "AI-queued applications completed successfully by the end of their assigned subsequent window / all applications assigned to that window; cutoff and SLA details need agreement.",
+        "when": "Daily after a 7-day pilot"
+      },
+      {
+        "name": "Rule accuracy",
+        "target": "DRAFT 100%",
+        "def": "Passing approved score fixtures / all approved fixtures covering the Phase 1 acceptance criteria, caps, redistribution and inclusive boundaries.",
+        "when": "Before release; each scoring change"
+      },
+      {
+        "name": "Incomplete-score exposure",
+        "target": "DRAFT 0%",
+        "def": "Pending-state renders exposing any criterion score or matching percentage / all observed pending-state renders.",
+        "when": "Release QA; weekly in production"
+      },
+      {
+        "name": "Application-time consistency",
+        "target": "DRAFT 100%",
+        "def": "Audited applications whose score and source versions remain unchanged after post-application edits and agree across Summary View and Matching Panel / all audited applications.",
+        "when": "Release QA; weekly audit"
+      },
+      {
+        "name": "Pop-up reliability",
+        "target": "DRAFT ≥99%",
+        "def": "Successful matching pop-up renders / eligible matching pop-up open attempts; count pending and final renders as successful.",
+        "when": "Weekly from launch"
+      }
+    ],
+    "metrics": [
+      {
+        "area": "Recruiter",
+        "metric": "Final-score review coverage",
+        "def": "Unique opened eligible jobs with a completed score and a final breakdown view / unique opened eligible jobs with a completed score; deduplicate job_id in first 30 launch days.",
+        "events": "applicant_processing_open, matching_popup_view, matching_score_complete",
+        "target": "DRAFT ≥60% by day 30",
+        "current": ""
+      },
+      {
+        "area": "Recruiter",
+        "metric": "Recruiter adoption",
+        "def": "Unique recruiter_id with matching_popup_view state=final / unique recruiter_id opening eligible jobs with a completed score in first 30 launch days.",
+        "events": "applicant_processing_open, matching_popup_view",
+        "target": "DRAFT ≥50% by day 30",
+        "current": ""
+      },
+      {
+        "area": "Recruiter",
+        "metric": "Pop-up reliability",
+        "def": "Successful pending/final renders / eligible open attempts in the week; distinguish service_type, state and error_code.",
+        "events": "matching_popup_open, matching_popup_view, matching_popup_fail",
+        "target": "DRAFT ≥99% weekly",
+        "current": ""
+      },
+      {
+        "area": "Recruiter",
+        "metric": "Eligibility compliance",
+        "def": "Observed unsupported-service renders / unsupported-service open attempts in QA and weekly audit; do not add a new UI entry point for unsupported jobs.",
+        "events": "matching_eligibility_check, matching_popup_view",
+        "target": "DRAFT 0 unsupported renders",
+        "current": ""
+      },
+      {
+        "area": "AI",
+        "metric": "Next-window completion",
+        "def": "AI applications completed by assigned_window_end / all applications assigned to that window. Retain application_id, queued_at and Asia/Dhaka window identifiers.",
+        "events": "matching_ai_queue, matching_ai_complete",
+        "target": "DRAFT ≥99% daily after pilot",
+        "current": ""
+      },
+      {
+        "area": "AI",
+        "metric": "Generation latency",
+        "def": "P50/P95 time from matching_ai_queue to matching_ai_complete; report separately by assigned window. No duration commitment exists in the PRD.",
+        "events": "matching_ai_queue, matching_ai_complete",
+        "target": "DRAFT baseline first 7 days",
+        "current": ""
+      },
+      {
+        "area": "AI",
+        "metric": "AI processing failures",
+        "def": "Failed application attempts / all AI processing attempts; one application can have multiple attempts. Capture failure class without CV/JD text.",
+        "events": "matching_ai_start, matching_ai_fail, matching_ai_complete",
+        "target": "DRAFT ≤1% attempt failure weekly",
+        "current": ""
+      },
+      {
+        "area": "Display",
+        "metric": "Incomplete-score exposure",
+        "def": "Pending renders with score_visible=true for any criterion or total / all pending renders; verify with UI QA as well as telemetry.",
+        "events": "matching_popup_view, matching_display_audit",
+        "target": "DRAFT 0% each release and weekly",
+        "current": ""
+      },
+      {
+        "area": "Manual",
+        "metric": "Rule accuracy",
+        "def": "Passing approved deterministic scoring fixtures / all approved scoring fixtures; include AC id, fixture_id and rule_version.",
+        "events": "matching_rule_check",
+        "target": "DRAFT 100% before release",
+        "current": ""
+      },
+      {
+        "area": "Manual",
+        "metric": "Redistribution integrity",
+        "def": "Checks where eligible manual weight sums to 40, AI caps stay fixed, and missing candidate data causes no redistribution / all eligible calculation checks.",
+        "events": "matching_weight_check",
+        "target": "DRAFT 100% each release and weekly",
+        "current": ""
+      },
+      {
+        "area": "Scoring",
+        "metric": "Final-score integrity",
+        "def": "Completed-score checks with AI in [0,60], manual in [0,40], total=AI+manual and Industry in {0,5} / all completed-score checks.",
+        "events": "matching_score_complete, matching_score_audit",
+        "target": "DRAFT 100% each release and weekly",
+        "current": ""
+      },
+      {
+        "area": "Scoring",
+        "metric": "Application-time consistency",
+        "def": "Audited applications preserving source snapshot and score after edits, with equal values in Summary View and Matching Panel / audited applications.",
+        "events": "matching_snapshot_capture, matching_snapshot_audit",
+        "target": "DRAFT 100% each release and weekly",
+        "current": ""
+      },
+      {
+        "area": "Ranking",
+        "metric": "Ranking correctness",
+        "def": "Passed approved legacy ranking fixtures / all approved fixtures; include pending, final, boost slabs and boosted experience/time ties.",
+        "events": "matching_ranking_check",
+        "target": "DRAFT 100% before release",
+        "current": ""
+      }
+    ]
+  },
+  "flows": [
+    {
+      "id": "f01",
+      "group": "manual",
+      "title": "Capture the inputs used for an application",
+      "who": "Candidate · scoring system",
+      "where": "Application submission",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R11 / AC-27: both scoring paths must use the CV and JD available at the moment the candidate applies.",
+          "nodes": [
+            {
+              "t": "Candidate submits an application",
+              "l": [
+                "Use any CV updates made before this application.",
+                "Expected Salary is mandatory when applying; retain the existing application validation."
+              ]
+            },
+            {
+              "t": "Capture the application-time CV",
+              "l": [
+                "Retain the supplied candidate facts, work history, skills, education and expected salary for this application."
+              ]
+            },
+            {
+              "t": "Capture the application-time JD",
+              "l": [
+                "Retain the recruiter requirements in force when this application is submitted, including configured hidden requirements."
+              ]
+            },
+            {
+              "t": "Resolve the education requirement source",
+              "l": [
+                "Use recruiter-entered education when present; otherwise use hidden Content Team education.",
+                "DRAFT implementation detail: version the resolved matching inputs so later edits cannot change pending calculations."
+              ]
+            },
+            {
+              "t": "Start manual calculation",
+              "l": [
+                "Use flows 06–11 with these captured inputs; do not expose the calculated field scores yet."
+              ]
+            },
+            {
+              "t": "Queue AI calculation",
+              "l": [
+                "Use flow 12 with the same captured CV/JD; do not queue a fresh calculation because of later CV/JD edits."
+              ]
+            },
+            {
+              "t": "Application scoring inputs are fixed",
+              "l": [
+                "Manual and AI calculations refer to the same application-time information.",
+                "Both recruiter views will use this application’s resulting score."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f02",
+      "group": "recruiter",
+      "title": "Open an applicant’s matching pop-up",
+      "who": "Recruiter",
+      "where": "Applicant Processing · matching entry point",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R08–09 / AC-20–25: only four listing services expose the pop-up, and incomplete calculations expose no scores.",
+          "nodes": [
+            {
+              "t": "Open Applicant Processing",
+              "l": [
+                "Select the job and an applicant."
+              ]
+            },
+            {
+              "t": "Eligible service?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Matching pop-up is unavailable",
+                  "l": [
+                    "All services other than Standard Listing, Premium Listing, Premium Plus and Hot Jobs do not show it."
+                  ],
+                  "kind": "end"
+                }
+              ]
+            },
+            {
+              "t": "Open Job Matching",
+              "l": [
+                "Eligible: Standard Listing, Premium Listing, Premium Plus or Hot Jobs."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Show AI identity and caution",
+              "l": [
+                "Display “Powered by bdjobs AI” inside the pop-up and on the matching score or Applicant Card.",
+                "Display “AI can make mistakes.” inside the pop-up, including its pending state."
+              ]
+            },
+            {
+              "t": "AI and manual complete?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Show generation message only",
+                  "l": [
+                    "“Being Generated; scores will be shown once generated.”",
+                    "Hide the total percentage and every AI/manual criterion score. Failure retains this state until successful processing.",
+                    "Do not sort this pending applicant by a matching percentage; see flow 04."
+                  ],
+                  "kind": "end"
+                }
+              ]
+            },
+            {
+              "t": "Load the final breakdown",
+              "l": [
+                "Read the score based on application-time CV/JD data; never substitute the applicant’s latest edited profile."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Complete matching score is visible",
+              "l": [
+                "Display all AI and manual criterion scores and the final percentage; inspect presentation rules in flow 03."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f03",
+      "group": "recruiter",
+      "title": "Inspect a completed matching breakdown",
+      "who": "Recruiter",
+      "where": "Job Matching pop-up · Applicant Card",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R09 / AC-25: preserve the five-column layout and original manual highlighting; Phase 1 contains no detailed AI reasoning.",
+          "nodes": [
+            {
+              "t": "Load a completed application score",
+              "l": [
+                "Precondition: both AI and manual calculations completed; otherwise use the pending state in flow 02."
+              ]
+            },
+            {
+              "t": "Render the five existing columns",
+              "l": [
+                "Criteria · Percentage · Job Requirement · Applicant Info · Match."
+              ]
+            },
+            {
+              "t": "Render the eight criterion rows",
+              "l": [
+                "AI: Skills & Responsibilities 40; Industry 5; Job Title and Experience 15.",
+                "Manual: Education, Salary, Location, Age/Other and Gender with their effective manual weights.",
+                "Combine Relevant Experience /10 and Job Title /5 in the AI 15-point display row; do not add legacy manual AI-replaced fields."
+              ]
+            },
+            {
+              "t": "Render final percentage and branding",
+              "l": [
+                "Final = AI earned /60 + manual earned /40, shown only once complete.",
+                "Keep “Powered by bdjobs AI” and “AI can make mistakes.” visible."
+              ]
+            },
+            {
+              "t": "Apply the original manual highlights",
+              "l": [
+                "Matching requirement/applicant text: green. Unmatched text: standard color. Zero match score: red. Partial match score: orange.",
+                "For AI semantic matches, do not mechanically mark unequal phrases as exact text matches."
+              ]
+            },
+            {
+              "t": "Order manual field text",
+              "l": [
+                "Show matched information first, then the remaining content.",
+                "If Age is configured but hidden from candidates, retain its scoring and display the matched allocation under Other."
+              ]
+            },
+            {
+              "t": "Text exceeds 45 characters?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Retain the complete text",
+                  "l": [
+                    "Continue at “Keep Phase 1 explanations out”."
+                  ],
+                  "kind": "step"
+                }
+              ]
+            },
+            {
+              "t": "Offer See More / See Less",
+              "l": [
+                "Retain the original expand/collapse behavior for text above 45 characters."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Keep Phase 1 explanations out",
+              "l": [
+                "Phase 2 / AC-26: later show concise AI score reasons, relevant evidence and missing requirements. This enhancement does not ship in Phase 1."
+              ]
+            },
+            {
+              "t": "Recruiter can inspect the full score",
+              "l": [
+                "The score breakdown, weighting, AI identity and caution are readable with the existing UI conventions."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f04",
+      "group": "recruiter",
+      "title": "Compare and order scored applicants",
+      "who": "Recruiter · legacy ranking system",
+      "where": "Applicant Processing · applicant list",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R10 / AC-28–29: matching-based ranking starts only after complete scores exist and retains the existing boost comparator.",
+          "nodes": [
+            {
+              "t": "Load the applicant list",
+              "l": [
+                "Read each application’s scoring completion state."
+              ]
+            },
+            {
+              "t": "Complete matching score?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Keep matching-based ranking inactive",
+                  "l": [
+                    "No matching percentage is shown or used for this pending application.",
+                    "Retain existing non-match ordering; the PRD does not define mixed pending/final placement."
+                  ],
+                  "kind": "end"
+                }
+              ]
+            },
+            {
+              "t": "Use the final matching percentage",
+              "l": [
+                "Apply the existing descending-score ranking logic only after both AI and manual scores exist."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Applicant is boosted?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Use the existing nonboosted comparator",
+                  "l": [
+                    "Continue at “Display the ordered list”. Equal-score nonboosted rules are not specified in this PRD."
+                  ],
+                  "kind": "step"
+                }
+              ]
+            },
+            {
+              "t": "Apply existing boosted slabs",
+              "l": [
+                "Boosted 60%–80% candidates are raised above certain candidates up to 80%, below candidates with 81% or higher.",
+                "Boosted 80%–100% candidates are raised above all others subject to existing boosted tie-breakers.",
+                "OPEN: retain legacy behavior; confirm the 80% overlap, fractional 80–81% boundary and lower-slab comparison."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Boosted scores equal?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Retain the existing score/boost order",
+                  "l": [
+                    "Continue at “Display the ordered list”."
+                  ],
+                  "kind": "step"
+                }
+              ]
+            },
+            {
+              "t": "Compare experience",
+              "l": [
+                "For equal matching scores among boosted applicants, greater experience ranks first."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Experience also equal?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Retain the experience order",
+                  "l": [
+                    "Continue at “Display the ordered list”."
+                  ],
+                  "kind": "step"
+                }
+              ]
+            },
+            {
+              "t": "Compare application time",
+              "l": [
+                "Earlier application time ranks first when boosted score and experience are both tied."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Display the ordered list",
+              "l": [
+                "Use the preserved legacy ranking output; no new boost or mixed-state ordering is introduced."
+              ]
+            },
+            {
+              "t": "Recruiter sees the ranked applicants",
+              "l": [
+                "Only completed scores participate in matching-percentage ranking."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f05",
+      "group": "recruiter",
+      "title": "Keep an application’s score after CV or JD edits",
+      "who": "Recruiter · candidate · scoring system",
+      "where": "CV/JD editing · Applicant Summary View · Matching Panel",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R11 / AC-27: edits after application never recalculate its score; later applicants use the updated JD.",
+          "nodes": [
+            {
+              "t": "Candidate CV or employer JD changes",
+              "l": [
+                "Determine whether the candidate has already applied to this job."
+              ]
+            },
+            {
+              "t": "Application already exists?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Use the latest data when applying",
+                  "l": [
+                    "An updated CV is used if saved before applying; an updated JD applies to candidates who apply after the edit.",
+                    "Continue with the new application capture in flow 01."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Retain the original scoring inputs",
+              "l": [
+                "Do not replace application-time CV/JD data with later edits."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Preserve this application’s calculation",
+              "l": [
+                "Do not trigger recalculation or enqueue new AI work because of the edit.",
+                "If initial calculation is still pending, finish it from the captured application-time inputs."
+              ]
+            },
+            {
+              "t": "Read the same application result in both views",
+              "l": [
+                "Applicant Summary View and Job Matching Panel use the same frozen score; until completion, retain the pending display rules."
+              ]
+            },
+            {
+              "t": "Existing score remains unchanged",
+              "l": [
+                "The CV/JD edit affects future applicable applications, never this application’s score."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f06",
+      "group": "manual",
+      "title": "Allocate the 40 manual matching points",
+      "who": "Manual scoring system",
+      "where": "Application-time manual calculation",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R03/07 / AC-09–12: only absent employer-defined criteria redistribute, and only within the manual budget.",
+          "nodes": [
+            {
+              "t": "Load base manual weights",
+              "l": [
+                "Education 15 · Salary 10 · Location 5 · Age 5 · Gender 5; base total 40."
+              ]
+            },
+            {
+              "t": "Resolve which requirements are available",
+              "l": [
+                "Education exists if any education subfield is supplied by recruiter or, when recruiter education is blank, by Content Team.",
+                "Configured hidden Salary/Age remain eligible. Candidate missing facts never make employer requirements unavailable."
+              ]
+            },
+            {
+              "t": "Apply the Gender exception",
+              "l": [
+                "Any or unspecified Gender remains eligible and earns its full effective allocation; do not redistribute it.",
+                "A distinct invalid Gender input state requires product definition."
+              ]
+            },
+            {
+              "t": "Sum eligible base weights",
+              "l": [
+                "S = sum of base weights of available manual criteria; fully absent Education contributes no eligible base weight."
+              ]
+            },
+            {
+              "t": "Eligible weight sum > 0?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Calculation needs a recovery rule",
+                  "l": [
+                    "Do not divide by zero or transfer the 40 points into AI.",
+                    "OPEN / DRAFT fallback: keep the score pending until the invalid-input recovery rule is agreed. Gender unspecified normally prevents this case."
+                  ],
+                  "kind": "end"
+                }
+              ]
+            },
+            {
+              "t": "Calculate effective criterion weights",
+              "l": [
+                "Effective_i = base_i ÷ S × 40 for each available manual criterion.",
+                "When all requirements are present: 15 / 10 / 5 / 5 / 5. Keep full precision; round only for presentation."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Apply single-absence allocations",
+              "l": [
+                "Salary absent → Education 20; Location/Age/Gender 6.6667 each. Education absent → Salary 16; Location/Age/Gender 8 each.",
+                "Location absent → Education 17.142857; Salary 11.428571; Age/Gender 5.714286 each.",
+                "Education + Salary absent → Location/Age/Gender 13.3333 each."
+              ]
+            },
+            {
+              "t": "Apply combined-absence allocations",
+              "l": [
+                "Salary + Location absent → Education 24; Age/Gender 8 each. Education + Location absent → Salary 20; Age/Gender 10 each.",
+                "Education + Salary + Location absent → Age/Gender 20 each. Defensive only-Salary-retained case → Salary 40.",
+                "The last case needs a distinct invalid/unavailable Gender state; ordinary unspecified Gender retains points."
+              ]
+            },
+            {
+              "t": "Pass effective weights to field matching",
+              "l": [
+                "Apply education subfield distribution only after its effective weight is known; see flows 07–11.",
+                "Mismatching or missing candidate data earns 0 in the affected required field; never shrink the denominator or redistribute its points."
+              ]
+            },
+            {
+              "t": "Eligible manual weights total 40",
+              "l": [
+                "Record the exact 40-point budget; rounded displayed allocations may visually total 39.99 or 40.01.",
+                "AI remains fixed at 60; no AI/manual cross-transfer is permitted."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f07",
+      "group": "manual",
+      "title": "Match the applicant’s education",
+      "who": "Manual scoring system · Content Team",
+      "where": "Education criterion",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R04 / AC-13–14: employer-missing subfields redistribute equally inside Education; candidate-missing subfields earn zero.",
+          "nodes": [
+            {
+              "t": "Resolve education requirements",
+              "l": [
+                "Use recruiter-entered education first; otherwise hidden Content Team education.",
+                "Content Team requirements are not displayed to candidates or exposed as recruiter-editable fields; recruiter requirements take precedence when entered for a future application."
+              ]
+            },
+            {
+              "t": "Any subfield specified?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Redistribute Education outside this criterion",
+                  "l": [
+                    "The entire 15-point base is absent from the manual group. Use flow 06 to allocate it proportionally among other eligible manual criteria.",
+                    "No education match is calculated."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Load effective Education weight E",
+              "l": [
+                "Flow 06 first determines E; base E = 15, but manual redistribution may increase it."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Initialize the three subfield shares",
+              "l": [
+                "Level = 0.50 × E; Degree = 0.25 × E; Major = 0.25 × E."
+              ]
+            },
+            {
+              "t": "All three requirements present?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Redistribute absent subfield shares equally",
+                  "l": [
+                    "Pool every absent requirement’s initial share; add pool ÷ number of specified subfields to each specified subfield.",
+                    "E=15, Major absent → Level 9.375 and Degree 5.625. Only Level present → Level 15.",
+                    "E=24, Major absent → Level 15 and Degree 9. Continue at “Evaluate Level of Education”."
+                  ],
+                  "kind": "step"
+                }
+              ]
+            },
+            {
+              "t": "Retain the base subfield shares",
+              "l": [
+                "E=15 → Level 7.5, Degree 3.75, Major 3.75. The subfield total always remains E."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Evaluate Level of Education",
+              "l": [
+                "Compare the candidate’s highest education level with the allowed qualifications; a higher completed level satisfies a lower required level.",
+                "If multiple allowed qualifications exist, any allowed level match earns the level allocation. Required level missing/unmatched in candidate data earns 0."
+              ]
+            },
+            {
+              "t": "Evaluate Degree Name",
+              "l": [
+                "If specified by the employer source, award its allocated share only when corresponding candidate information matches; missing/nonmatching candidate degree earns 0."
+              ]
+            },
+            {
+              "t": "Evaluate Concentration / Major",
+              "l": [
+                "If specified by the employer source, award its allocated share only when corresponding candidate information matches; missing/nonmatching candidate major earns 0."
+              ]
+            },
+            {
+              "t": "Sum earned education subfield points",
+              "l": [
+                "At E=15 with all requirements: matching Level 7.5 + Degree 3.75 + unmatched Major 0 = 11.25/15.",
+                "If Major is absent from the requirement and Level/Degree both match: 9.375 + 5.625 = 15/15."
+              ]
+            },
+            {
+              "t": "Education points are calculated",
+              "l": [
+                "Education earned is between 0 and E; candidate evidence never triggers redistribution. Keep this field score hidden until the total is complete."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f08",
+      "group": "manual",
+      "title": "Match the applicant’s expected salary",
+      "who": "Manual scoring system",
+      "where": "Salary criterion · existing salary alert",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R05 / AC-15–16: use inclusive 80%-of-Min and 120%-of-Max thresholds; minimum-only has no upper limit.",
+          "nodes": [
+            {
+              "t": "Read the application-time salary inputs",
+              "l": [
+                "Use the configured job salary even when hidden from the job advertisement.",
+                "Candidate Expected Salary is mandatory on application; a missing candidate fact never triggers weight redistribution."
+              ]
+            },
+            {
+              "t": "Salary requirement entirely absent?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Reallocate the Salary base weight",
+                  "l": [
+                    "Salary is unavailable; redistribute its 10 base points proportionally within the manual group using flow 06."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Classify the configured salary bounds",
+              "l": [
+                "This PRD defines Minimum-only and Minimum + Maximum salary.",
+                "OPEN: Maximum-only, Negotiable, invalid or contradictory bounds need product confirmation."
+              ],
+              "lab": "no"
+            },
+            {
+              "t": "Salary form is defined?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Resolve the undefined salary rule",
+                  "l": [
+                    "Do not invent a maximum-only or Negotiable score.",
+                    "DRAFT fallback: the full result remains pending until the required calculation can be completed."
+                  ],
+                  "kind": "end"
+                }
+              ]
+            },
+            {
+              "t": "Load effective Salary allocation W",
+              "l": [
+                "Use W from flow 06; W=10 without manual redistribution. The 20% thresholds stay unchanged when W changes."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Expected Salary provided?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Earn 0 Salary points",
+                  "l": [
+                    "A required candidate fact is missing; retain W in the manual budget. Existing application validation should require this fact."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Calculate the lower threshold",
+              "l": [
+                "Lower = 0.80 × Minimum. At Minimum BDT 20,000, lower = BDT 16,000."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Maximum also specified?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Use no upper salary limit",
+                  "l": [
+                    "For Minimum BDT 20,000, expectations 19,000 and 30,000 both pass; 15,000 fails.",
+                    "Continue at “Expected salary within bounds?”."
+                  ],
+                  "kind": "step"
+                }
+              ]
+            },
+            {
+              "t": "Calculate the upper threshold",
+              "l": [
+                "Upper = 1.20 × Maximum. For BDT 20,000–30,000, acceptable salary = BDT 16,000–36,000 inclusive."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Expected salary within bounds?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Earn 0 Salary points",
+                  "l": [
+                    "Keep W in the denominator. If expectation exceeds 120% of a specified Maximum, also show the existing alert/notification.",
+                    "Example: BDT 36,001 against 20,000–30,000 earns 0 and triggers the existing alert."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Earn the full Salary allocation W",
+              "l": [
+                "Both endpoints are inclusive: BDT 16,000 and 36,000 pass for the 20,000–30,000 requirement.",
+                "Hide the field score until both AI and manual calculations are complete."
+              ],
+              "lab": "yes",
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f09",
+      "group": "manual",
+      "title": "Match the applicant’s location",
+      "who": "Manual scoring system",
+      "where": "Location criterion",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R06 / AC-17: preferred location OR present address OR permanent address can earn the full district-level allocation.",
+          "nodes": [
+            {
+              "t": "Load the configured job location",
+              "l": [
+                "If absent, flow 06 excludes Location and reallocates its 5 base points. Otherwise use its effective allocation W."
+              ]
+            },
+            {
+              "t": "Location requirement exists?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Location weight is reallocated",
+                  "l": [
+                    "Use flow 06; no Location score is calculated."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Compare preferred job location",
+              "l": [
+                "Use OR logic up to district level; missing candidate location is not a match."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Preferred district matches?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Earn full Location allocation W",
+                  "l": [
+                    "One matching location source is enough."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Compare present address",
+              "l": [
+                "Example: Dhaka job, preferred Chattogram, present address Dhaka → full points."
+              ],
+              "lab": "no"
+            },
+            {
+              "t": "Present district matches?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Earn full Location allocation W",
+                  "l": [
+                    "With base weights this is 5/5, even though the preferred location did not match."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Compare permanent address",
+              "l": [
+                "Evaluate this source only when preferred and present locations did not match."
+              ],
+              "lab": "no"
+            },
+            {
+              "t": "Permanent district matches?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Earn 0 Location points",
+                  "l": [
+                    "No district match in any of the three sources. Missing candidate data does not redistribute W."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Earn full Location allocation W",
+              "l": [
+                "The OR match succeeds; retain the result hidden until overall scoring completes."
+              ],
+              "lab": "yes",
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f10",
+      "group": "manual",
+      "title": "Match the applicant’s age",
+      "who": "Manual scoring system",
+      "where": "Age criterion · Other display",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R06 / AC-18: permit exactly one year beyond each valid bound, and keep hidden configured Age eligible.",
+          "nodes": [
+            {
+              "t": "Read the configured age requirement",
+              "l": [
+                "Hidden-from-candidates Age is still a requirement; never treat visibility as absence."
+              ]
+            },
+            {
+              "t": "Age requirement exists?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Age weight is reallocated",
+                  "l": [
+                    "Use the manual availability rules in flow 06. Missing candidate age is a different case and does not redistribute."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Load the effective Age allocation W",
+              "l": [
+                "Base W=5; use the adjusted value after flow 06. Retain the application-time applicant information."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Applicant age available?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Earn 0 Age points",
+                  "l": [
+                    "Keep the required Age allocation W; no redistribution."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Expand the allowed bounds by one year",
+              "l": [
+                "Min + Max → Min−1 through Max+1 inclusive. Max-only → age ≤ Max+1. Min-only → age ≥ Min−1.",
+                "QA examples: 20–24 permits 19–25; Maximum 30 permits 31; Minimum 30 permits 29."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Age within allowed bounds?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Earn 0 Age points",
+                  "l": [
+                    "20–24 with age 26 → 0/5; Maximum 30 with age 32 → 0/5; Minimum 30 with age 28 → 0/5 at base weights."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Award the full Age allocation W",
+              "l": [
+                "20–24 with age 19 → full; one-year boundary equality passes."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Apply the original Age display mapping",
+              "l": [
+                "If configured Age is hidden from the job advertisement, show its matched allocation under Other; otherwise use Age.",
+                "This display occurs only after both scoring paths complete."
+              ]
+            },
+            {
+              "t": "Age matching is complete",
+              "l": [
+                "The configured criterion remains in the 40-point manual budget regardless of candidate match."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f11",
+      "group": "manual",
+      "title": "Match the applicant’s gender",
+      "who": "Manual scoring system",
+      "where": "Gender criterion",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R06 / AC-19: Any and unspecified Gender earn full points and take precedence over generic missing-criterion redistribution.",
+          "nodes": [
+            {
+              "t": "Read the application-time Gender requirement",
+              "l": [
+                "Use the effective Gender weight W from flow 06; base W=5."
+              ]
+            },
+            {
+              "t": "Any or unspecified?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Earn the full Gender allocation W",
+                  "l": [
+                    "All applicants receive full Gender points for Any or an unspecified requirement, including missing candidate gender.",
+                    "Retain this allocation; do not redistribute it."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Read the specific requested gender",
+              "l": [
+                "The source defines Male or Female; a distinct invalid-input state needs product definition."
+              ],
+              "lab": "no"
+            },
+            {
+              "t": "Candidate gender matches?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Earn 0 Gender points",
+                  "l": [
+                    "Nonmatching or missing candidate gender earns 0 when a specific requirement exists; no redistribution."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Earn the full Gender allocation W",
+              "l": [
+                "The candidate matches the specific requested gender; hide the points until overall scoring completes."
+              ],
+              "lab": "yes",
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f12",
+      "group": "ai",
+      "title": "Queue AI matching in the subsequent window",
+      "who": "AI scheduler",
+      "where": "Application queue · Asia/Dhaka",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R08 / AC-20–21: choose the subsequent processing window, with no mandatory 24-hour waiting period.",
+          "nodes": [
+            {
+              "t": "Read the application submission time",
+              "l": [
+                "Use Bangladesh time, Asia/Dhaka (UTC+06:00), and the captured application-time CV/JD.",
+                "OPEN: define ownership for timestamps exactly at 06:00 and 18:00."
+              ]
+            },
+            {
+              "t": "Applied in 06:00–18:00?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Assign the following 06:00–18:00 window",
+                  "l": [
+                    "Applications in the 18:00–06:00 period enter the subsequent daytime window.",
+                    "Example: apply at 20:00 → process in the following 06:00–18:00 window."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Assign the following 18:00–06:00 window",
+              "l": [
+                "Example: apply at 10:00 → process in the subsequent 18:00–06:00 window."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Keep all scores hidden during processing",
+              "l": [
+                "The pop-up shows “Being Generated; scores will be shown once generated.” Manual calculation may finish internally but its scores remain hidden."
+              ]
+            },
+            {
+              "t": "Application is assigned to its next AI window",
+              "l": [
+                "Generation becomes visible only after successful batch completion and manual completion; it is not promised at the window’s starting time.",
+                "OPEN: agree completion SLA and failure recovery. Continue with AI evaluation in flows 13–19."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f13",
+      "group": "ai",
+      "title": "Score skills and responsibilities from CV evidence",
+      "who": "AI evaluator",
+      "where": "Skills & Responsibilities · maximum 40",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R02 / AC-02–03: select evidence case A–E and preserve its caps; the JD never proves a candidate has a capability.",
+          "nodes": [
+            {
+              "t": "Read only the supplied CV and JD",
+              "l": [
+                "Apply medium-strict semantic relevance. Do not inflate scores or infer unsupported capabilities.",
+                "Evidence may come from skills/expertise, work history, responsibilities, projects, achievements and training."
+              ]
+            },
+            {
+              "t": "Any relevant CV evidence?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Record Case E: 0/40",
+                  "l": [
+                    "No relevant evidence earns zero; do not move the unused points to Industry, Experience, Title or manual criteria."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Classify the supplied evidence",
+              "l": [
+                "Check for listed skills, experience and explicit responsibilities before choosing a case."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Skills, experience and duties?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Score Case A within 25 + 15",
+                  "l": [
+                    "Skills maximum 25; Responsibilities maximum 15. Full points require supported critical skills and strongly aligned responsibility scope.",
+                    "Illustration only: 19/25 + 11/15 = 30/40. Then continue at “Apply evidence deductions”."
+                  ],
+                  "kind": "step"
+                }
+              ]
+            },
+            {
+              "t": "Skills and experience present?",
+              "l": [],
+              "lab": "no",
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Score Case B within 32 + 8",
+                  "l": [
+                    "Explicit responsibilities are absent. Skills maximum 32; responsibility credit maximum 8 only when other supplied role/project evidence supports it.",
+                    "Never assume duties. Illustration only: 25/32 + supported role evidence 3/8 = 28/40. Continue at “Apply evidence deductions”."
+                  ],
+                  "kind": "step"
+                }
+              ]
+            },
+            {
+              "t": "Only skills or expertise?",
+              "l": [],
+              "lab": "no",
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Score Case C from listed skills only",
+                  "l": [
+                    "Evaluate the full 40-point pool against relevant listed skills; do not infer ownership or practical usage.",
+                    "A listed skill can earn credit but does not automatically receive full credit. Continue at “Apply evidence deductions”."
+                  ],
+                  "kind": "step"
+                }
+              ]
+            },
+            {
+              "t": "Score Case D from actual work evidence",
+              "l": [
+                "Only experience, titles or responsibilities are available. Award skill credit only where work outputs/duties directly demonstrate that required skill.",
+                "Unsupported requirements earn 0. Retain the 40-point component cap; no arbitrary per-skill formula is specified."
+              ],
+              "lab": "no"
+            },
+            {
+              "t": "Apply evidence deductions",
+              "l": [
+                "Deduct meaningfully for missing critical skills, low-quality evidence and limited responsibility overlap.",
+                "Semantic equivalents may match when tools and outcomes are materially related. Generic transferable capabilities are not automatically direct matches."
+              ]
+            },
+            {
+              "t": "Skills & Responsibilities earns 0–40",
+              "l": [
+                "Apply this dimension independently. Even absent JD details do not move its marks into another component."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f14",
+      "group": "ai",
+      "title": "Score the required industry or domain",
+      "who": "AI evaluator",
+      "where": "Industry · fixed 5 points",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R02 / AC-04: Industry is exactly 0 or 5, supported by candidate evidence rather than a generic business function.",
+          "nodes": [
+            {
+              "t": "Read the JD industry/domain requirement",
+              "l": [
+                "Match against evidence in the application-time CV, not assumptions from the JD."
+              ]
+            },
+            {
+              "t": "Usable JD industry requirement?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Record 0/5 · draft interpretation",
+                  "l": [
+                    "The source flags 0/5 for a missing JD industry/domain requirement as a working interpretation requiring product sign-off.",
+                    "Keep the 5-point cap; no redistribution."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Read candidate industry evidence",
+              "l": [
+                "Employer industry, business sector, product/service domain, industry-specific duties or projects may support the match.",
+                "Sales, Marketing, HR, Finance, Operations or Administration alone do not prove a specific industry."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Supported direct industry match?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Record 0/5",
+                  "l": [
+                    "Unrelated industry, unsupported inference or missing candidate industry evidence receives 0. No partial 1–4 points."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Record 5/5 Industry points",
+              "l": [
+                "An exact or directly relevant industry/domain is supported. Its marks never transfer to another criterion."
+              ],
+              "lab": "yes",
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f15",
+      "group": "ai",
+      "title": "Score the candidate’s stated job title",
+      "who": "AI evaluator",
+      "where": "Job Title · maximum 5",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R02 / AC-05: title evidence is independent of experience and industry; skills alone never establish a job title.",
+          "nodes": [
+            {
+              "t": "Read the candidate’s stated roles",
+              "l": [
+                "Compare actual title, function and seniority with the JD. Do not infer a title from skills alone."
+              ]
+            },
+            {
+              "t": "Relevant stated title exists?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Record 0/5 Title points",
+                  "l": [
+                    "Missing title or no relevant title earns 0. Do not redistribute unused title points."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Close role and seniority match?",
+              "l": [],
+              "lab": "yes",
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Record 5/5 Title points",
+                  "l": [
+                    "Role and seniority closely match the requirement."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Same function with reasonable gap?",
+              "l": [],
+              "lab": "no",
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Record 4/5 Title points",
+                  "l": [
+                    "Same function with a reasonable seniority difference."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Adjacent or overlapping role?",
+              "l": [],
+              "lab": "no",
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Record 2–3/5 Title points",
+                  "l": [
+                    "Use supported role overlap. The PRD gives a qualitative 2–3 band, not a deterministic subformula."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Assign weak-relevance credit",
+              "l": [
+                "A stated title with weak role relevance earns 1/5."
+              ],
+              "lab": "no"
+            },
+            {
+              "t": "Record 1/5 Title points",
+              "l": [
+                "Title remains capped at 5 and independent of Relevant Experience /10 and Industry /5."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f16",
+      "group": "ai",
+      "title": "Normalize the experience requirement and CV duration",
+      "who": "AI evaluator",
+      "where": "Relevant Experience input preparation",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R02 / AC-06–07: −1 means an unspecified bound, months are divided by 12, and overlapping work periods count once.",
+          "nodes": [
+            {
+              "t": "Parse the JD experience bounds",
+              "l": [
+                "First number = Min; second = Max. −1 is unspecified and is never a number of years.",
+                "2 to 5 → Min 2 / Max 5; 2 to −1 → Min only; −1 to 5 → Max only; −1 to −1 → unspecified."
+              ]
+            },
+            {
+              "t": "Classify whether experience is mandatory",
+              "l": [
+                "Not mandatory: null, empty, Freshers, No Experience Required, Not specified, Not applicable, invalid or −1 to −1.",
+                "All other valid minimum/maximum requirements are mandatory."
+              ]
+            },
+            {
+              "t": "Experience mandatory?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Set base Experience score to 10/10",
+                  "l": [
+                    "Any candidate experience, including missing, satisfies a nonmandatory experience requirement.",
+                    "Use supplied evidence only for the explicit-domain modifier in flow 18; Title and Industry remain independent."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Candidate duration available?",
+              "l": [],
+              "lab": "yes",
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Set Experience score to 0/10",
+                  "l": [
+                    "A mandatory requirement with missing candidate experience earns 0. No redistribution; continue aggregation in flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Convert all durations to years",
+              "l": [
+                "Months ÷ 12; 61 months = 5.083333… years. Never interpret 61 months as 61 years.",
+                "Do not introduce a legacy experience rounding tolerance."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Count overlapping periods only once",
+              "l": [
+                "Use relevant experience where the CV supports it; retain full precision when comparing with Min and Max."
+              ]
+            },
+            {
+              "t": "Preserve supported domain evidence",
+              "l": [
+                "Explicitly unrelated professional domain may trigger the later 50% modifier. Missing domain information alone never triggers a penalty."
+              ]
+            },
+            {
+              "t": "Normalized duration is ready for tier scoring",
+              "l": [
+                "Use the appropriate mandatory range path in flow 17, then the domain modifier and aggregation in flow 18."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f17",
+      "group": "ai",
+      "title": "Apply the relevant-experience score tiers",
+      "who": "AI evaluator",
+      "where": "Relevant Experience · base maximum 10",
+      "parts": [
+        {
+          "sub": "Both Min and Max are valid",
+          "finding": "EMP-R02 / AC-06: below-Min is always zero; above-Max gaps use exact 3-year and 5-year inclusive boundaries.",
+          "nodes": [
+            {
+              "t": "Load a mandatory Min–Max requirement",
+              "l": [
+                "Use normalized candidate years x from flow 16. Missing duration already earns 0 there."
+              ]
+            },
+            {
+              "t": "Candidate below Min?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Base Experience = 0/10",
+                  "l": [
+                    "No minimum tolerance. JD 2–5, CV 1 year → 0. Continue at flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Candidate at or below Max?",
+              "l": [],
+              "lab": "no",
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Base Experience = 10/10",
+                  "l": [
+                    "Min ≤ x ≤ Max. JD 2–5, CV 4 relevant years → 10. Continue at flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Calculate gap above Max",
+              "l": [
+                "g = x − Max; g is strictly positive on this path."
+              ],
+              "lab": "no"
+            },
+            {
+              "t": "Gap at most 3 years?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Base Experience = 7.5/10",
+                  "l": [
+                    "0 < g ≤ 3. JD 2–5, CV 7 years → 7.5. Continue at flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Gap at most 5 years?",
+              "l": [],
+              "lab": "no",
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Base Experience = 5/10",
+                  "l": [
+                    "3 < g ≤ 5. JD 2–5, CV 8.5 years → 5. Continue at flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Base Experience = 2.5/10",
+              "l": [
+                "g > 5. Then apply the explicit-domain modifier in flow 18."
+              ],
+              "lab": "no",
+              "type": "ok"
+            }
+          ]
+        },
+        {
+          "sub": "Only Min is valid",
+          "finding": "EMP-R02 / AC-06: minimum-only tiers measure the excess above Min, with inclusive cutoffs at 2, 4 and 6 years.",
+          "nodes": [
+            {
+              "t": "Load a mandatory Min-only requirement",
+              "l": [
+                "Example format: 2 to −1. Use normalized candidate years x."
+              ]
+            },
+            {
+              "t": "Candidate below Min?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Base Experience = 0/10",
+                  "l": [
+                    "Every x < Min earns 0, without tolerance. Continue at flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Calculate gap above Min",
+              "l": [
+                "g = x − Min; g ≥ 0 on this path."
+              ],
+              "lab": "no"
+            },
+            {
+              "t": "Gap at most 2 years?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Base Experience = 10/10",
+                  "l": [
+                    "0 ≤ g ≤ 2, including x exactly equal to Min. Continue at flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Gap at most 4 years?",
+              "l": [],
+              "lab": "no",
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Base Experience = 7.5/10",
+                  "l": [
+                    "2 < g ≤ 4. Continue at flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Gap at most 6 years?",
+              "l": [],
+              "lab": "no",
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Base Experience = 5/10",
+                  "l": [
+                    "4 < g ≤ 6. JD 2 to −1, CV 8 years → 5. Continue at flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Base Experience = 2.5/10",
+              "l": [
+                "g > 6. Then apply the explicit-domain modifier in flow 18."
+              ],
+              "lab": "no",
+              "type": "ok"
+            }
+          ]
+        },
+        {
+          "sub": "Only Max is valid",
+          "finding": "EMP-R02 / AC-06: there is no penalty below a maximum-only bound; excess tiers use 2-year and 4-year boundaries.",
+          "nodes": [
+            {
+              "t": "Load a mandatory Max-only requirement",
+              "l": [
+                "Example format: −1 to 5. Use normalized candidate years x."
+              ]
+            },
+            {
+              "t": "Candidate at or below Max?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Base Experience = 10/10",
+                  "l": [
+                    "x ≤ Max, including candidates below Max. JD −1 to 5, CV 4 years → 10. Continue at flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Calculate gap above Max",
+              "l": [
+                "g = x − Max; g > 0 on this path."
+              ],
+              "lab": "no"
+            },
+            {
+              "t": "Gap at most 2 years?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Base Experience = 7.5/10",
+                  "l": [
+                    "0 < g ≤ 2. Continue at flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Gap at most 4 years?",
+              "l": [],
+              "lab": "no",
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "yes",
+                  "t": "Base Experience = 5/10",
+                  "l": [
+                    "2 < g ≤ 4. Continue at flow 18."
+                  ],
+                  "kind": "ok"
+                }
+              ]
+            },
+            {
+              "t": "Base Experience = 2.5/10",
+              "l": [
+                "g > 4. Then apply the explicit-domain modifier in flow 18."
+              ],
+              "lab": "no",
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f18",
+      "group": "ai",
+      "title": "Combine the four fixed AI components",
+      "who": "AI evaluator",
+      "where": "AI score · fixed maximum 60",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R02 / AC-01/08: halve experience only for an explicitly unrelated domain, then sum independent AI components without redistribution.",
+          "nodes": [
+            {
+              "t": "Read the base Experience result",
+              "l": [
+                "Use flow 16 for nonmandatory/missing-duration cases, or the matching range path in flow 17."
+              ]
+            },
+            {
+              "t": "Experience explicitly unrelated?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Retain the base Experience points",
+                  "l": [
+                    "A relevant domain or no domain evidence does not justify the 50% penalty.",
+                    "Continue at “Read the other AI component scores”."
+                  ],
+                  "kind": "step"
+                }
+              ]
+            },
+            {
+              "t": "Apply the unrelated-domain modifier",
+              "l": [
+                "Experience earned = base Experience × 0.50. Examples: 7.5 → 3.75; 10 → 5.",
+                "JD 2–5, CV 4 explicitly unrelated years → Experience 5/10. Industry may independently be 0/5."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Read the other AI component scores",
+              "l": [
+                "Skills & Responsibilities from flow 13: 0–40. Industry from flow 14: exactly 0 or 5. Job Title from flow 15: 0–5."
+              ]
+            },
+            {
+              "t": "Sum all four earned components",
+              "l": [
+                "AI earned = Skills & Responsibilities + Industry + Relevant Experience + Job Title.",
+                "Independent caps remain 40 + 5 + 10 + 5 = 60. Display Experience + Title as one 15-point criterion."
+              ]
+            },
+            {
+              "t": "Retain all unused AI allocations",
+              "l": [
+                "No transfer between AI components or into manual criteria, even when JD details or candidate evidence are absent.",
+                "Never treat the JD as evidence that the candidate possesses a requirement."
+              ]
+            },
+            {
+              "t": "AI earned points are calculated out of 60",
+              "l": [
+                "Final publication still waits for successful batch processing and complete manual calculation; see flows 19–20."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f19",
+      "group": "ai",
+      "title": "Finish AI generation or keep matching pending",
+      "who": "AI batch processor",
+      "where": "Assigned processing window · pending pop-up",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R08 / AC-22: failure exposes neither a partial score nor a final score; the generation message remains until successful processing.",
+          "nodes": [
+            {
+              "t": "Run AI for the assigned application",
+              "l": [
+                "Use the captured application-time CV/JD and flows 13–18, not current edited records."
+              ]
+            },
+            {
+              "t": "AI generation succeeds?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Retain the pending state",
+                  "l": [
+                    "Show “Being Generated; scores will be shown once generated.” Hide every AI/manual score and total percentage.",
+                    "Do not activate matching-based ranking. Retry/backoff, alerts and completion SLA are OPEN; no new retry button is specified."
+                  ],
+                  "kind": "end"
+                }
+              ]
+            },
+            {
+              "t": "Retain the completed AI result",
+              "l": [
+                "AI must respect the fixed component caps and use the original application-time inputs.",
+                "DRAFT engineering gate: detect incomplete/out-of-cap results before marking generation complete."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Manual calculation also complete?",
+              "l": [],
+              "type": "dec",
+              "br": [
+                {
+                  "lab": "no",
+                  "t": "Retain the pending state",
+                  "l": [
+                    "The total and every criterion score remain hidden while manual calculation is incomplete.",
+                    "DRAFT recovery: resume the incomplete calculation; the PRD supplies no manual-failure recovery schedule."
+                  ],
+                  "kind": "end"
+                }
+              ]
+            },
+            {
+              "t": "Pass both results to finalization",
+              "l": [
+                "Use AI /60 and manual /40 for the same application snapshot; see flow 20."
+              ],
+              "lab": "yes"
+            },
+            {
+              "t": "Application is ready for complete-score publication",
+              "l": [
+                "A finished batch alone is insufficient if the manual calculation is not yet complete."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f20",
+      "group": "manual",
+      "title": "Publish the complete matching percentage",
+      "who": "Scoring system · recruiter",
+      "where": "Applicant Summary View · Job Matching Panel · Applicant Processing",
+      "parts": [
+        {
+          "sub": "",
+          "finding": "EMP-R01/08 / AC-23: the complete matching percentage is the sum of AI and manual earned points, never a rescaled manual-only number.",
+          "nodes": [
+            {
+              "t": "Read both completed calculation results",
+              "l": [
+                "Precondition: AI generation succeeded and all required manual calculations completed for the captured application-time inputs."
+              ]
+            },
+            {
+              "t": "Sum the manual earned field points",
+              "l": [
+                "Education earned + Salary earned + Location earned + Age earned + Gender earned.",
+                "Use effective available weights totalling 40, including education’s internal subfield distribution; manual earned ranges from 0 to 40."
+              ]
+            },
+            {
+              "t": "Calculate the final percentage",
+              "l": [
+                "Final = AI earned points (0–60) + manual earned points (0–40). Maximum 100.",
+                "Use full-precision values internally; round for presentation. The source final-score example uses two decimals."
+              ]
+            },
+            {
+              "t": "Retain full precision until display",
+              "l": [
+                "Source example: Salary absent → Education weight 20 and Location/Age/Gender 20/3 each.",
+                "Earned: Education 15 + Location 0 + Age 20/3 + Gender 20/3 = 28.333333… manual points.",
+                "AI 47 + manual 28.333333… = 75.33% displayed; do not sum prematurely rounded weights."
+              ]
+            },
+            {
+              "t": "Expose the completed breakdown",
+              "l": [
+                "Show all AI/manual field scores and the final percentage together; replace the generation message only now.",
+                "Use the pop-up layout and branding rules in flow 03."
+              ]
+            },
+            {
+              "t": "Use the same result across recruiter views",
+              "l": [
+                "Applicant Summary View and Job Matching Panel display the same application-time result. Later CV/JD edits do not change it."
+              ]
+            },
+            {
+              "t": "Apply the existing final-score ranking",
+              "l": [
+                "Update the applicant’s position using flow 04, including legacy boost slabs and tie-breakers."
+              ]
+            },
+            {
+              "t": "Recruiter can compare the final score",
+              "l": [
+                "The complete 0–100% result is visible and stable; no provisional or incomplete score has been exposed."
+              ],
+              "type": "ok"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "rev": 1,
+  "updated": "2026-11-03",
+  "lock": "972787a305bad924e34ef39f6a8151f46454884ce45ad7fd5e97e19b1865bd9e"
+}
+</script>
+<div class="page">
+<header class="top">
+<p class="eyebrow" id="doc-eyebrow"></p>
+<h1 id="doc-title"></h1>
+<p class="lede" id="doc-lede"></p>
+<p class="role" id="role" hidden></p>
+<ul class="legend" aria-label="Legend">
+<li><span class="lg lg-step"></span>Step</li>
+<li><span class="lg lg-dec"></span>Decision</li>
+<li><span class="lg lg-ok"></span>Success</li>
+<li><span class="lg lg-end"></span>Flow stops here</li>
+</ul>
+<p class="doc-meta"><span><span id="doc-count"></span> flows</span><span id="doc-updated"></span></p>
+</header>
+<div class="layout">
+<nav class="toc" id="toc" aria-label="Contents"></nav>
+<main class="flows" id="flows"></main>
+</div>
+</div>
+<button class="edfab" id="edfab" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>Edit page</button>
+<div class="edbar" id="edbar" hidden></div>
+<script id="flows-app">const HEAD = "<title>Product Requirement Flow<\/title>\n<meta name=\"claude:viewport-fit-sides\" content=\"cover\">\n<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\">\n<link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap\">\n<!-- All page content is the JSON in #flowdata. Edit it by hand, or use the Edit page button (password protected). -->\n";
+const SHELL = "<div class=\"page\">\n<header class=\"top\">\n<p class=\"eyebrow\" id=\"doc-eyebrow\"><\/p>\n<h1 id=\"doc-title\"><\/h1>\n<p class=\"lede\" id=\"doc-lede\"><\/p>\n<p class=\"role\" id=\"role\" hidden><\/p>\n<ul class=\"legend\" aria-label=\"Legend\">\n<li><span class=\"lg lg-step\"><\/span>Step<\/li>\n<li><span class=\"lg lg-dec\"><\/span>Decision<\/li>\n<li><span class=\"lg lg-ok\"><\/span>Success<\/li>\n<li><span class=\"lg lg-end\"><\/span>Flow stops here<\/li>\n<\/ul>\n<p class=\"doc-meta\"><span><span id=\"doc-count\"><\/span> flows<\/span><span id=\"doc-updated\"><\/span><\/p>\n<\/header>\n<div class=\"layout\">\n<nav class=\"toc\" id=\"toc\" aria-label=\"Contents\"><\/nav>\n<main class=\"flows\" id=\"flows\"><\/main>\n<\/div>\n<\/div>\n<button class=\"edfab\" id=\"edfab\" type=\"button\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 20h4L19 9l-4-4L4 16z\"/><path d=\"M13.5 6.5l4 4\"/><\/svg>Edit page<\/button>\n<div class=\"edbar\" id=\"edbar\" hidden><\/div>";
+(function () {
+  'use strict';
+  const SRC = document.getElementById('flowdata');
+  const ORIGINAL = JSON.parse(SRC.textContent);
+  const KEY = 'flowsdoc:' + ORIGINAL.id;
+  const clone = o => JSON.parse(JSON.stringify(o));
+  let D = clone(ORIGINAL);
+  let savedAt = null, LOCAL = null;
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (s && s.rev === ORIGINAL.rev && s.data) { LOCAL = s.data; savedAt = s.at || null; }
+  } catch (_) {}
+
+  let editing = false, sel = null; const history = [];
+  let ART = null, DL = null, readOnly = false;
+  // Edit lock: everyone sees the page read-only. "Edit page" asks for the product team password;
+  // only its SHA-256 hash is stored (ORIGINAL.lock). No lock set = editing is open.
+  // This stops accidental edits; it is not security, since the page source is readable.
+  const ULKEY = 'flowsdoc-unlock:' + ORIGINAL.id;
+  let unlocked = !ORIGINAL.lock;
+  try { if (ORIGINAL.lock && sessionStorage.getItem(ULKEY) === ORIGINAL.lock) unlocked = true; } catch (_) {}
+  if (unlocked && LOCAL) D = LOCAL;
+  const RESET = ':root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}img{max-width:100%}[hidden]{display:none!important}';
+  const PKEY = 'flowsdoc-pending:' + ORIGINAL.id;
+  let pending = null;
+  try { pending = JSON.parse(sessionStorage.getItem(PKEY) || 'null'); } catch (_) {}
+  if (pending && pending.rev === ORIGINAL.rev) { try { sessionStorage.removeItem(PKEY); localStorage.removeItem(KEY); } catch (_) {} D = clone(ORIGINAL); savedAt = null; LOCAL = null; pending = 'published'; }
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pad = n => String(n).padStart(2, '0');
+  const groupOf = id => D.groups.find(g => g.id === id) || D.groups[0];
+
+  // ---------- persistence ----------
+  function save() {
+    savedAt = new Date().toISOString();
+    try { localStorage.setItem(KEY, JSON.stringify({ rev: ORIGINAL.rev, at: savedAt, data: D })); } catch (_) {}
+    status();
+  }
+  function snap() { history.push(JSON.stringify(D)); if (history.length > 60) history.shift(); }
+  function status() {
+    const el = $('#ed-status'); if (!el) return;
+    const changed = JSON.stringify(D) !== JSON.stringify(ORIGINAL);
+    el.textContent = !changed ? 'No changes yet' : 'Saved in this browser' + (savedAt ? ' · ' + new Date(savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '');
+    const u = $('#ed-undo'); if (u) u.disabled = !history.length;
+    const pb = document.querySelector('[data-act="publish"]'); if (pb) pb.disabled = !changed;
+  }
+
+  // ---------- render ----------
+  const ce = (k, ph, extra) => editing ? ` contenteditable="true" spellcheck="true" data-k="${k}" data-ph="${esc(ph)}"${extra || ''}` : ` data-k="${k}"`;
+
+  function nodeHTML(n, cls, kPrefix, path) {
+    const lines = (n.l || []).join('\n');
+    return `<div class="node ${cls}${isSel(path) ? ' is-sel' : ''}" ${pathAttr(path)}><strong${ce(kPrefix + 't', 'Step name')}>${esc(n.t)}</strong><span class="sub"${ce(kPrefix + 'l', 'Add detail lines (optional)')}>${esc(lines)}</span></div>`;
+  }
+  const pathAttr = p => `data-fi="${p.fi}" data-pi="${p.pi}" data-ni="${p.ni}"${p.bi != null ? ` data-bi="${p.bi}"` : ''}`;
+  const isSel = p => sel && sel.fi === p.fi && sel.pi === p.pi && sel.ni === p.ni && (sel.bi ?? null) === (p.bi ?? null);
+
+  function chart(fi, pi) {
+    const nodes = D.flows[fi].parts[pi].nodes;
+    if (!nodes.length) return `<div class="canvas"><div class="chart">${editing ? `<button class="ed-add" data-act="first" data-fi="${fi}" data-pi="${pi}">+ Add the first step</button>` : '<p class="finding">No steps yet.</p>'}</div></div>`;
+    const rows = nodes.map((n, ni) => {
+      const p = { fi, pi, ni }, t = n.type || 'step', brs = n.br || [];
+      const rc = ['row']; if (ni === 0) rc.push('first'); if (ni === nodes.length - 1) rc.push('last'); if (brs.length) rc.push('has-br'); if (brs.length > 1) rc.push('multi');
+      const inlab = ni > 0 && (n.lab || editing) ? `<span class="inlab"${ce('lab', 'label')} ${pathAttr(p)}>${esc(n.lab || '')}</span>` : '';
+      const shape = t === 'dec'
+        ? `<div class="node dec${isSel(p) ? ' is-sel' : ''}" ${pathAttr(p)}><span${ce('t', 'Question?')}>${esc(n.t)}</span></div>`
+        : nodeHTML(n, t === 'ok' ? 'ok' : 'step', '', p);
+      let bh = '';
+      if (brs.length) bh = `<div class="branches">${brs.map((b, bi) => { const bp = { fi, pi, ni, bi }; const lab = (b.lab || editing) ? `<span class="blab"${ce('blab', 'label')} ${pathAttr(bp)}>${esc(b.lab || '')}</span>` : ''; return `<div class="branch">${lab}<i class="ah"></i>${nodeHTML(b, b.kind === 'end' ? 'end' : b.kind === 'ok' ? 'ok' : 'step', 'b', bp)}</div>`; }).join('')}</div>`;
+      return `<div class="${rc.join(' ')}"><div class="main"><div class="nwrap">${inlab}${shape}</div></div>${bh}</div>`;
+    }).join('');
+    return `<div class="canvas"><div class="chart">${rows}</div></div>`;
+  }
+
+  function flowHTML(f, fi) {
+    const g = groupOf(f.group), n = fi + 1, multi = f.parts.length > 1;
+    const ctl = editing ? `<span class="ed-flow"><label class="sr" for="grp-${fi}">Group</label><select id="grp-${fi}" data-act="group" data-fi="${fi}">${D.groups.map(x => `<option value="${x.id}"${x.id === f.group ? ' selected' : ''}>${esc(x.label)}</option>`).join('')}</select><button data-act="fup" data-fi="${fi}" aria-label="Move flow up" ${fi === 0 ? 'disabled' : ''}>↑</button><button data-act="fdown" data-fi="${fi}" aria-label="Move flow down" ${fi === D.flows.length - 1 ? 'disabled' : ''}>↓</button><button data-act="fpart" data-fi="${fi}">+ Part</button><button data-act="fdel" data-fi="${fi}" class="danger">Delete flow</button></span>` : '';
+    const parts = f.parts.map((p, pi) => multi
+      ? `<div class="part"><h3${ce('sub', 'Part name')} data-fi="${fi}" data-pi="${pi}">${esc(p.sub || '')}</h3><p class="part-finding"${ce('finding', 'One-sentence point of this part')} data-fi="${fi}" data-pi="${pi}">${esc(p.finding || '')}</p>${editing ? `<button class="ed-mini danger" data-act="pdel" data-fi="${fi}" data-pi="${pi}">Remove this part</button>` : ''}${chart(fi, pi)}</div>`
+      : chart(fi, pi)).join('');
+    return `<section class="flow g-${g.color}" id="flow-${n}" aria-labelledby="h-${n}">
+      <header class="flow-head">
+        <div class="flow-id"><span class="num">Flow ${pad(n)}</span><span class="grp">${esc(g.label)}</span>${ctl}</div>
+        <h2 id="h-${n}"${ce('title', 'Flow name')} data-fi="${fi}">${esc(f.title)}</h2>
+        ${multi ? '' : `<p class="finding"${ce('finding', 'One-sentence point of this flow')} data-fi="${fi}" data-pi="0">${esc(f.parts[0].finding || '')}</p>`}
+        <dl class="meta"><div><dt>Who</dt><dd${ce('who', 'Who')} data-fi="${fi}">${esc(f.who)}</dd></div><div><dt>Where</dt><dd${ce('where', 'Where')} data-fi="${fi}">${esc(f.where)}</dd></div></dl>
+      </header>${parts}</section>`;
+  }
+
+  // ---------- overview: description, scope, KPIs, metrics ----------
+  const OV_SECTIONS = [['desc', 'Product description'], ['scope', 'Scope'], ['kpis', 'KPIs'], ['metrics', 'Metrics']];
+  function ov() {
+    const o = D.overview = D.overview || {};
+    o.ledes = o.ledes || {}; o.desc = o.desc || []; o.scope = o.scope || {}; o.scope.in = o.scope.in || []; o.scope.out = o.scope.out || [];
+    o.north = o.north || { name: '', def: '', target: '' }; o.kpis = o.kpis || []; o.metrics = o.metrics || [];
+    return o;
+  }
+  const oce = (path, ph) => editing ? ` contenteditable="true" spellcheck="true" data-k="ov" data-path="${path}" data-ph="${esc(ph)}"` : '';
+  const dash = (v, path, ph) => editing ? `<span${oce(path, ph)}>${esc(v || '')}</span>` : (v ? esc(v) : '<span class="nil">—</span>');
+  const del = (list, i, what) => editing ? `<button class="ov-del" data-act="ovdel" data-list="${list}" data-i="${i}" aria-label="Remove ${what}" title="Remove">×</button>` : '';
+  const add = (list, label) => editing ? `<button class="ed-add ov-add" data-act="ovadd" data-list="${list}">${label}</button>` : '';
+  const areaClass = a => { const s = String(a || '').toLowerCase(); return s.includes('club') ? 'club' : s.includes('join') ? 'join' : 'core'; };
+  function ovHead(key, title) {
+    const l = ov().ledes[key] || '';
+    return `<header class="ov-head"><p class="ov-eyebrow">Overview</p><h2>${title}</h2>${(l || editing) ? `<p class="ov-lede"${oce('ledes.' + key, 'One line about this section (optional)')}>${esc(l)}</p>` : ''}</header>`;
+  }
+  function overviewHTML() {
+    const o = ov();
+    const desc = `<section class="ov" id="ov-desc">${ovHead('desc', 'Product description')}
+      <dl class="desc">${o.desc.map((r, i) => `<div class="desc-row"><dt${oce(`desc.${i}.label`, 'Label')}>${esc(r.label)}</dt><dd${oce(`desc.${i}.text`, 'Write this part of the description')}>${esc(r.text)}</dd>${del('desc', i, 'row')}</div>`).join('')}</dl>${add('desc', '+ Add a row')}</section>`;
+    const col = (k, title, cls) => `<div class="scope-col ${cls}"><h3>${title} <span class="cnt">${o.scope[k].length}</span></h3><ul>${o.scope[k].map((t, i) => `<li><i aria-hidden="true"></i><span${oce(`scope.${k}.${i}`, 'Scope item')}>${esc(t)}</span>${del('scope.' + k, i, 'item')}</li>`).join('')}</ul>${add('scope.' + k, '+ Add item')}</div>`;
+    const scope = `<section class="ov" id="ov-scope">${ovHead('scope', 'Scope')}<div class="scope-grid">${col('in', 'In scope · v1', 'in')}${col('out', 'Out of scope', 'out')}</div></section>`;
+    const n = o.north;
+    const kpis = `<section class="ov" id="ov-kpis">${ovHead('kpis', 'KPIs')}
+      <div class="north"><p class="north-tag">North star</p><div class="north-main"><strong${oce('north.name', 'North star metric')}>${esc(n.name)}</strong><p${oce('north.def', 'How it is counted')}>${esc(n.def)}</p></div><p class="north-target"${oce('north.target', 'Target')}>${esc(n.target)}</p></div>
+      <div class="kpis">${o.kpis.map((k, i) => `<article class="kpi"><div class="kpi-top"><p class="kpi-target">${dash(k.target, `kpis.${i}.target`, 'Target')}</p>${del('kpis', i, 'KPI')}</div><h3${oce(`kpis.${i}.name`, 'KPI name')}>${esc(k.name)}</h3><p class="kpi-def"${oce(`kpis.${i}.def`, 'How it is measured')}>${esc(k.def)}</p><p class="kpi-when">${dash(k.when, `kpis.${i}.when`, 'When')}</p></article>`).join('')}${add('kpis', '+ Add KPI')}</div></section>`;
+    const metrics = `<section class="ov" id="ov-metrics">${ovHead('metrics', 'Metrics')}
+      <div class="mwrap"><table class="mtable"><thead><tr><th scope="col">Area</th><th scope="col">Metric</th><th scope="col">Definition</th><th scope="col">Events</th><th scope="col">Target</th><th scope="col">Current</th>${editing ? '<th scope="col"><span class="sr">Remove</span></th>' : ''}</tr></thead>
+      <tbody>${o.metrics.map((m, i) => `<tr><td data-l="Area"><span class="area a-${areaClass(m.area)}"${oce(`metrics.${i}.area`, 'Area')}>${esc(m.area)}</span></td><th scope="row" data-l="Metric"${oce(`metrics.${i}.metric`, 'Metric')}>${esc(m.metric)}</th><td data-l="Definition"${oce(`metrics.${i}.def`, 'Definition')}>${esc(m.def)}</td><td data-l="Events" class="ev">${dash(m.events, `metrics.${i}.events`, 'event_name, …')}</td><td data-l="Target" class="num">${dash(m.target, `metrics.${i}.target`, 'Target')}</td><td data-l="Current" class="num cur">${dash(m.current, `metrics.${i}.current`, 'After launch')}</td>${editing ? `<td class="rm">${del('metrics', i, 'metric')}</td>` : ''}</tr>`).join('')}</tbody></table></div>${add('metrics', '+ Add metric')}</section>`;
+    return desc + scope + kpis + metrics + `<p class="sec-split" id="flows-start">User flows</p>`;
+  }
+  function getPath(path) { const ks = path.split('.'); let o = ov(); for (let i = 0; i < ks.length - 1; i++) o = o[ks[i]]; return [o, ks[ks.length - 1]]; }
+  function blankFor(list) {
+    if (list === 'desc') return { label: 'New', text: '' };
+    if (list === 'kpis') return { name: 'New KPI', target: '', def: '', when: '' };
+    if (list === 'metrics') { const last = ov().metrics.slice(-1)[0]; return { area: last ? last.area : '', metric: 'New metric', def: '', events: '', target: '', current: '' }; }
+    return 'New item';
+  }
+  const listAt = list => list.split('.').reduce((o, k) => o[k], ov());
+  const firstField = { desc: 'label', kpis: 'name', metrics: 'metric' };
+
+  function tocHTML() {
+    const ovNav = `<div class="nav-group g-ov"><p class="nav-label">Overview</p><ol>${OV_SECTIONS.map(([k, t], i) => `<li><a href="#ov-${k}"><span class="n">${'ABCD'[i]}</span>${t}</a></li>`).join('')}</ol></div>`;
+    return ovNav + D.groups.map(g => {
+      const items = D.flows.map((f, fi) => [f, fi]).filter(([f]) => f.group === g.id);
+      if (!items.length) return '';
+      return `<div class="nav-group g-${g.color}"><p class="nav-label">${esc(g.label)}</p><ol>${items.map(([f, fi]) => `<li><a href="#flow-${fi + 1}"><span class="n">${pad(fi + 1)}</span>${esc(f.title)}</a></li>`).join('')}</ol></div>`;
+    }).join('');
+  }
+  function renderRole() {
+    const r = $('#role'); if (!r) return;
+    r.hidden = false;
+    r.className = 'role ' + (unlocked ? 'is-pm' : 'is-view');
+    const unpublished = unlocked && changedFromOriginal();
+    r.innerHTML = unlocked
+      ? `<span class="dot"></span><b>Editing unlocked</b><span>In this browser tab.${unpublished ? ' Your edits are not shared yet: use Save or share to download or publish them.' : ''}</span>${ORIGINAL.lock ? '<button class="role-btn" data-act="lock" type="button">Lock</button>' : ''}`
+      : `<span class="dot"></span><b>View only</b><span>For QA, design and dev. The product manager edits this page.</span>`;
+  }
+  function render() {
+    document.body.classList.toggle('editing', editing);
+    $('#doc-eyebrow').textContent = D.eyebrow; $('#doc-title').textContent = D.title; $('#doc-lede').textContent = D.lede;
+    [['#doc-eyebrow', 'eyebrow'], ['#doc-title', 'doctitle'], ['#doc-lede', 'lede']].forEach(([s, k]) => { const el = $(s); if (editing) { el.setAttribute('contenteditable', 'true'); el.dataset.k = k; el.dataset.ph = k === 'eyebrow' ? 'Company · Product requirements' : k === 'lede' ? 'One paragraph that sums up the product' : 'Product name'; } else { el.removeAttribute('contenteditable'); delete el.dataset.k; } });
+    $('#toc').innerHTML = tocHTML();
+    $('#flows').innerHTML = overviewHTML() + D.flows.map(flowHTML).join('') + (editing ? `<button class="ed-add big" data-act="fadd">+ Add a flow</button>` : '');
+    $('#doc-count').textContent = D.flows.length;
+    const up = $('#doc-updated'); if (up) { const t = D.updated ? new Date(D.updated) : null; up.textContent = t && !isNaN(t) ? 'Updated ' + t.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' }) : ''; }
+    renderRole();
+    renderBar();
+  }
+
+  // ---------- edit bar ----------
+  function renderBar() {
+    const bar = $('#edbar'), fab = $('#edfab');
+    fab.hidden = editing; bar.hidden = !editing;
+    if (!editing) return;
+    let ctx = '<span class="ed-hint">Click any text to type. Click a flow box for step controls.</span>';
+    if (sel) {
+      const node = getNode(sel);
+      if (!node) sel = null;
+      else if (sel.bi == null) {
+        const t = node.type || 'step';
+        ctx = `<span class="ed-label">Step</span><span class="seg">${[['step', 'Step'], ['dec', 'Decision'], ['ok', 'Success']].map(([v, l]) => `<button data-act="ntype" data-v="${v}" aria-pressed="${t === v}">${l}</button>`).join('')}</span>
+          <button data-act="nup" aria-label="Move up">↑</button><button data-act="ndown" aria-label="Move down">↓</button>
+          <button data-act="addstep">+ Step below</button><button data-act="adddec">+ Decision below</button><button data-act="addbr">+ Side exit</button>
+          <button data-act="ndel" class="danger">Delete</button>`;
+      } else {
+        const k = node.kind || 'step';
+        ctx = `<span class="ed-label">Side exit</span><span class="seg">${[['step', 'Continues'], ['end', 'Stops'], ['ok', 'Success']].map(([v, l]) => `<button data-act="btype" data-v="${v}" aria-pressed="${k === v}">${l}</button>`).join('')}</span>
+          <button data-act="bup" aria-label="Move up">↑</button><button data-act="bdown" aria-label="Move down">↓</button><button data-act="addbr">+ Side exit</button>
+          <button data-act="bdel" class="danger">Delete exit</button>`;
+      }
+    }
+    bar.innerHTML = `<div class="ed-ctx">${ctx}</div><div class="ed-right"><span id="ed-status" class="ed-status"></span><button id="ed-undo" data-act="undo">Undo</button><button data-act="groups">Groups</button><button data-act="export">Save or share</button>${ART && !readOnly ? `<button data-act="publish" class="primary" ${changedFromOriginal() ? '' : 'disabled'}>Publish changes</button>` : ''}<button data-act="done">Done</button></div>`;
+    status();
+  }
+
+  // ---------- data helpers ----------
+  const part = p => D.flows[p.fi].parts[p.pi];
+  function getNode(p) { try { const n = part(p).nodes[p.ni]; return p.bi == null ? n : (n.br || [])[p.bi]; } catch (_) { return null; } }
+  function swap(a, i, j) { if (j < 0 || j >= a.length) return false; [a[i], a[j]] = [a[j], a[i]]; return true; }
+  function mutate(fn) { snap(); fn(); save(); render(); refocusSel(); }
+  function refocusSel() { if (!sel) return; const el = document.querySelector(`.node[data-fi="${sel.fi}"][data-pi="${sel.pi}"][data-ni="${sel.ni}"]${sel.bi != null ? `[data-bi="${sel.bi}"]` : ':not([data-bi])'}`); if (el && el.getBoundingClientRect) { const r = el.getBoundingClientRect(); if (r.top < 60 || r.bottom > innerHeight - 90) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }
+
+  // ---------- text commits ----------
+  function commit(el) {
+    const k = el.dataset.k; if (!k) return;
+    const raw = el.innerText.replace(/ /g, ' ');
+    const one = raw.replace(/\s*\n\s*/g, ' ').trim();
+    const lines = raw.split('\n').map(s => s.trim()).filter(Boolean);
+    const fi = +el.dataset.fi, pi = +el.dataset.pi;
+    const host = el.closest('[data-ni]') || el;
+    const p = { fi: +host.dataset.fi, pi: +host.dataset.pi, ni: +host.dataset.ni, bi: host.dataset.bi != null ? +host.dataset.bi : null };
+    let changed = true;
+    const set = (obj, key, val) => { if (JSON.stringify(obj[key] ?? '') === JSON.stringify(val)) { changed = false; return; } snap(); obj[key] = val; };
+    switch (k) {
+      case 'doctitle': set(D, 'title', one || D.title); break;
+      case 'eyebrow': set(D, 'eyebrow', one); break;
+      case 'lede': set(D, 'lede', one); break;
+      case 'title': set(D.flows[fi], 'title', one || 'Untitled flow'); break;
+      case 'who': set(D.flows[fi], 'who', one); break;
+      case 'where': set(D.flows[fi], 'where', one); break;
+      case 'finding': set(D.flows[fi].parts[pi], 'finding', one); break;
+      case 'sub': set(D.flows[fi].parts[pi], 'sub', one); break;
+      case 't': set(getNode({ ...p, bi: null }), 't', one || 'Untitled step'); break;
+      case 'l': set(getNode({ ...p, bi: null }), 'l', lines); break;
+      case 'lab': set(getNode({ ...p, bi: null }), 'lab', one); break;
+      case 'bt': set(getNode(p), 't', one || 'Untitled exit'); break;
+      case 'bl': set(getNode(p), 'l', lines); break;
+      case 'blab': set(getNode(p), 'lab', one); break;
+      case 'ov': { const [o, key] = getPath(el.dataset.path); set(o, key, one); break; }
+      default: changed = false;
+    }
+    if (changed) {
+      save(); renderRole();
+      if (k === 'title' || k === 'doctitle') { const y = scrollY; renderTocOnly(); scrollTo(0, y); }
+      if (k === 'ov' && /^metrics\.\d+\.area$/.test(el.dataset.path)) el.className = 'area a-' + areaClass(one);    }
+  }
+  function renderTocOnly() { $('#toc').innerHTML = tocHTML(); }
+
+  // ---------- events ----------
+  document.addEventListener('focusout', e => { if (editing && e.target.isContentEditable && e.target.dataset.k) commit(e.target); });
+  document.addEventListener('keydown', e => {
+    if (!editing) return;
+    const t = e.target;
+    if (t.isContentEditable && e.key === 'Enter' && !['l', 'bl'].includes(t.dataset.k)) { e.preventDefault(); t.blur(); }
+    if (t.isContentEditable && e.key === 'Escape') t.blur();
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z' && !t.isContentEditable && history.length) { e.preventDefault(); undo(); }
+  });
+  document.addEventListener('paste', e => {
+    if (!editing || !e.target.isContentEditable) return;
+    e.preventDefault();
+    const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+    if (document.queryCommandSupported && document.queryCommandSupported('insertText')) document.execCommand('insertText', false, text);
+    else { const s = getSelection(); if (s.rangeCount) { s.deleteFromDocument(); s.getRangeAt(0).insertNode(document.createTextNode(text)); } }
+  });
+
+  function undo() { if (!history.length) return; D = JSON.parse(history.pop()); sel = null; save(); render(); }
+
+  document.addEventListener('click', e => {
+    if (e.target.closest('#edfab')) { if (!unlocked) { unlockDialog(); return; } editing = true; sel = null; render(); return; }
+    if (e.target.closest('[data-act="lock"]')) { lockAgain(); return; }
+    if (!editing) return;
+    const nodeEl = e.target.closest('.node[data-ni]');
+    const act = e.target.closest('[data-act]');
+    if (act && act.tagName !== 'SELECT') { e.preventDefault(); doAct(act); return; }
+    if (nodeEl) {
+      const p = { fi: +nodeEl.dataset.fi, pi: +nodeEl.dataset.pi, ni: +nodeEl.dataset.ni, bi: nodeEl.dataset.bi != null ? +nodeEl.dataset.bi : null };
+      if (!isSel(p)) { document.querySelectorAll('.node.is-sel').forEach(x => x.classList.remove('is-sel')); nodeEl.classList.add('is-sel'); sel = p; renderBar(); }
+      return;
+    }
+    if (!e.target.closest('#edbar, .modal, .ed-flow') && sel) { sel = null; document.querySelectorAll('.node.is-sel').forEach(x => x.classList.remove('is-sel')); renderBar(); }
+  });
+  document.addEventListener('change', e => {
+    const s = e.target.closest('select[data-act="group"]'); if (!s) return;
+    const fi = +s.dataset.fi; mutate(() => { D.flows[fi].group = s.value; });
+  });
+
+  function doAct(btn) {
+    const a = btn.dataset.act, fi = btn.dataset.fi != null ? +btn.dataset.fi : null, pi = btn.dataset.pi != null ? +btn.dataset.pi : 0;
+    if (document.activeElement && document.activeElement.isContentEditable) document.activeElement.blur();
+    switch (a) {
+      case 'done': editing = false; sel = null; render(); return;
+      case 'undo': undo(); return;
+      case 'export': exportDialog(); return;
+      case 'groups': groupsDialog(); return;
+      case 'publish': publishAll(); return;
+      case 'fadd': { const last = D.flows[D.flows.length - 1]; mutate(() => D.flows.push({ id: 'n' + Date.now(), group: last ? last.group : D.groups[0].id, title: 'New flow', who: 'User', where: 'App', parts: [{ sub: '', finding: 'What this flow proves, in one sentence', nodes: [{ t: 'First step', l: [] }, { t: 'Done', l: [], type: 'ok' }] }] })); const el = document.getElementById('flow-' + D.flows.length); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); return; }
+      case 'fup': mutate(() => swap(D.flows, fi, fi - 1)); return;
+      case 'fdown': mutate(() => swap(D.flows, fi, fi + 1)); return;
+      case 'fpart': mutate(() => { const f = D.flows[fi]; if (f.parts.length === 1 && !f.parts[0].sub) f.parts[0].sub = 'Part 1'; f.parts.push({ sub: 'Part ' + (f.parts.length + 1), finding: '', nodes: [{ t: 'First step', l: [] }] }); }); return;
+      case 'pdel': confirmDialog('Remove this part?', 'Its steps are removed too. You can undo this.', 'Remove part', () => mutate(() => { D.flows[fi].parts.splice(pi, 1); if (D.flows[fi].parts.length === 1) D.flows[fi].parts[0].sub = ''; sel = null; })); return;
+      case 'fdel': confirmDialog(`Delete "${D.flows[fi].title}"?`, 'The whole flow is removed and later flows are renumbered. You can undo this.', 'Delete flow', () => mutate(() => { D.flows.splice(fi, 1); sel = null; })); return;
+      case 'first': mutate(() => { D.flows[fi].parts[pi].nodes.push({ t: 'First step', l: [] }); sel = { fi, pi, ni: 0, bi: null }; }); return;
+      case 'ovadd': {
+        const list = btn.dataset.list, y = scrollY; let at = 0;
+        mutate(() => { const arr = listAt(list); arr.push(blankFor(list)); at = arr.length - 1; }); scrollTo(0, y);
+        const f = firstField[list];
+        const el = document.querySelector(`[data-path="${list}.${at}${f ? '.' + f : ''}"]`);
+        if (el) { el.focus(); const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+        return;
+      }
+      case 'ovdel': { const list = btn.dataset.list, i = +btn.dataset.i, y = scrollY; mutate(() => { listAt(list).splice(i, 1); }); scrollTo(0, y); return; }
+    }
+    if (!sel) return;
+    const nodes = part(sel).nodes, n = nodes[sel.ni];
+    switch (a) {
+      case 'ntype': mutate(() => { if (btn.dataset.v === 'step') delete n.type; else n.type = btn.dataset.v; if (n.type === 'dec') n.l = []; }); break;
+      case 'nup': mutate(() => { if (swap(nodes, sel.ni, sel.ni - 1)) sel.ni--; }); break;
+      case 'ndown': mutate(() => { if (swap(nodes, sel.ni, sel.ni + 1)) sel.ni++; }); break;
+      case 'addstep': mutate(() => { nodes.splice(sel.ni + 1, 0, { t: 'New step', l: [] }); sel = { ...sel, ni: sel.ni + 1, bi: null }; }); focusSelText(); break;
+      case 'adddec': mutate(() => { nodes.splice(sel.ni + 1, 0, { type: 'dec', t: 'New question?', br: [{ t: 'Other path', l: [], kind: 'step', lab: 'no' }] }); sel = { ...sel, ni: sel.ni + 1, bi: null }; }); focusSelText(); break;
+      case 'addbr': mutate(() => { n.br = n.br || []; const at = sel.bi != null ? sel.bi + 1 : n.br.length; n.br.splice(at, 0, { t: 'New exit', l: [], kind: 'step', lab: '' }); sel = { ...sel, bi: at }; }); focusSelText(); break;
+      case 'ndel': mutate(() => { nodes.splice(sel.ni, 1); sel = null; }); break;
+      case 'btype': mutate(() => { n.br[sel.bi].kind = btn.dataset.v; }); break;
+      case 'bup': mutate(() => { if (swap(n.br, sel.bi, sel.bi - 1)) sel.bi--; }); break;
+      case 'bdown': mutate(() => { if (swap(n.br, sel.bi, sel.bi + 1)) sel.bi++; }); break;
+      case 'bdel': mutate(() => { n.br.splice(sel.bi, 1); if (!n.br.length) delete n.br; sel = { ...sel, bi: null }; }); break;
+    }
+  }
+  function focusSelText() {
+    const el = document.querySelector(`.node.is-sel strong, .node.is-sel > span[contenteditable]`);
+    if (!el) return; el.focus();
+    const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+
+  // ---------- dialogs ----------
+  function modal(title, body, buttons) {
+    const m = document.createElement('div'); m.className = 'modal'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+    m.innerHTML = `<div class="modal-card"><h3>${esc(title)}</h3><div class="modal-body">${body}</div><div class="modal-btns">${buttons.map((b, i) => `<button data-mb="${i}" class="${b.cls || ''}">${esc(b.label)}</button>`).join('')}</div></div>`;
+    document.body.appendChild(m);
+    const close = () => m.remove();
+    m.addEventListener('click', e => { const b = e.target.closest('[data-mb]'); if (b) { const r = buttons[+b.dataset.mb].on; if (!r || r(m) !== false) close(); } else if (e.target === m) close(); });
+    m.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    const f = m.querySelector('textarea, button.primary, button'); if (f) f.focus();
+    return m;
+  }
+  function confirmDialog(t, body, label, ok) { modal(t, `<p>${esc(body)}</p>`, [{ label: 'Cancel' }, { label, cls: 'danger-fill', on: () => { ok(); } }]); }
+
+  function pageSource(data) {
+    const css = document.getElementById('page-style').textContent;
+    const js = document.getElementById('flows-app').textContent;
+    const json = JSON.stringify(data, null, 1).replace(/</g, '\\u003c');
+    return HEAD + '<style id="page-style">' + css + '</style>\n<script type="application/json" id="flowdata">\n' + json + '\n</' + 'script>\n' + SHELL + '\n<script id="flows-app">' + js + '</' + 'script>\n';
+  }
+  function fullDoc(data) {
+    return '<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>' + RESET + '</style></head><body>' + pageSource(data) + '</body></html>';
+  }
+  const changedFromOriginal = () => JSON.stringify(D) !== JSON.stringify(ORIGINAL);
+  async function publishAll() {
+    if (!ART || readOnly) return;
+    if (!changedFromOriginal()) { toast('Nothing to publish yet'); return; }
+    if (document.activeElement && document.activeElement.isContentEditable) document.activeElement.blur();
+    const data = outData();
+    try { sessionStorage.setItem(PKEY, JSON.stringify({ rev: data.rev, data: D })); } catch (_) {}
+    toast('Publishing…');
+    try { await ART.publish(fullDoc(data)); }
+    catch (err) {
+      const c = err && err.code;
+      if (c === 'conflict') { toast('Someone published first. Reloading to their version…'); return; }
+      try { sessionStorage.removeItem(PKEY); } catch (_) {}
+      if (c === 'not_writer' || c === 'not_granted' || c === 'consent_required' || c === 'not_declared' || c === 'capability_disabled' || c === 'capability_removed') { readOnly = true; renderBar(); toast('You can view this page but not publish it. Download the HTML instead.'); return; }
+      if (c === 'rate_limited') { toast('Publishing too often. Wait a moment and try again.'); return; }
+      if (c === 'too_large') { toast('The page is too large to publish.'); return; }
+      toast('Publishing failed. Your edits are still saved in this browser.');
+    }
+  }
+  async function downloadDoc() {
+    const data = outData();
+    const html = '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<style>' + RESET + '</style>\n</head>\n<body>\n' + pageSource(data) + '</body>\n</html>\n';
+    const name = (data.file || data.id) + '.html';
+    if (DL) {
+      try { await DL.save({ filename: name, data: new Blob([html], { type: 'text/html' }) }); toast('Saved ' + name); }
+      catch (err) { const c = err && err.code; if (c === 'declined') return; if (c === 'rate_limited') { toast('A save is already open. Try again in a moment.'); return; } toast('Download is not available here. Use Copy flow data.'); }
+      return;
+    }
+    try { const blob = new Blob([html], { type: 'text/html' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); toast('Download started'); }
+    catch (_) { toast('Download is not available here. Use Copy flow data.'); }
+  }
+  function exportDialog() {
+    const json = JSON.stringify(D, null, 1);
+    const canPub = ART && !readOnly;
+    modal('Save or share your changes', `<p>Your edits are kept in this browser as you work.${canPub ? ' <b>Publish changes</b> saves them into this page for everyone who has the link.' : ' Other people see the original until you share an updated file.'}</p>
+      <ul class="steps-list">${canPub ? '<li><b>Publish changes</b>: updates this page for everyone. Earlier versions stay in the page history.</li>' : ''}<li><b>Download HTML</b>: a new file with every change built in, to open or send.</li><li><b>Copy flow data</b>: everything as text you can paste to Claude.</li></ul>
+      <label class="lbl" for="ed-json">Flow data</label><textarea id="ed-json" readonly rows="6">${esc(json)}</textarea>`, [
+      { label: 'Import data', on: () => { importDialog(); } },
+      { label: 'Change password', on: () => { passwordDialog(); } },
+      { label: 'Reset to original', cls: 'danger', on: () => { confirmDialog('Reset to the original?', 'All changes saved in this browser are discarded. You can undo this until you reload.', 'Reset', () => { snap(); D = clone(ORIGINAL); sel = null; try { localStorage.removeItem(KEY); } catch (_) {} savedAt = null; render(); }); } },
+      { label: 'Copy flow data', on: m => { const ta = m.querySelector('#ed-json'); const done = () => toast('Flow data copied'); try { navigator.clipboard.writeText(json).then(done, () => { ta.select(); toast('Press Ctrl+C or Cmd+C to copy'); }); } catch (_) { ta.select(); toast('Press Ctrl+C or Cmd+C to copy'); } return false; } },
+      { label: 'Download HTML', cls: canPub ? '' : 'primary', on: () => { downloadDoc(); } },
+      ...(canPub ? [{ label: 'Publish changes', cls: 'primary', on: () => { publishAll(); } }] : [])
+    ]);
+  }
+  function importDialog() {
+    modal('Import flow data', `<p>Paste flow data copied from this page. It replaces what is shown now; you can undo.</p><label class="lbl" for="ed-imp">Flow data</label><textarea id="ed-imp" rows="8" placeholder='{"title": …}'></textarea><p class="small err" id="ed-imp-err" hidden></p>`, [
+      { label: 'Cancel' },
+      { label: 'Import', cls: 'primary', on: m => { const err = m.querySelector('#ed-imp-err'); try { const d = JSON.parse(m.querySelector('#ed-imp').value); if (!d || !Array.isArray(d.flows) || !Array.isArray(d.groups)) throw new Error('This text has no flows or groups in it.'); snap(); D = d; sel = null; save(); render(); toast('Imported'); } catch (x) { err.textContent = 'Could not import: ' + (x.message || 'the text is not valid flow data'); err.hidden = false; return false; } } }
+    ]);
+  }
+  // ---------- edit lock ----------
+  function sha256hex(str) {
+    const bytes = new TextEncoder().encode(str);
+    if (window.crypto && crypto.subtle && window.isSecureContext !== false) {
+      return crypto.subtle.digest('SHA-256', bytes).then(b => Array.from(new Uint8Array(b), x => x.toString(16).padStart(2, '0')).join('')).catch(() => sha256js(bytes));
+    }
+    return Promise.resolve(sha256js(bytes));
+  }
+  function sha256js(bytes) {
+    const K = [], H = [], isP = n => { for (let f = 2; f * f <= n; f++) if (n % f === 0) return false; return true; };
+    for (let n = 2, i = 0; i < 64; n++) if (isP(n)) { if (i < 8) H[i] = ((Math.pow(n, 1 / 2) % 1) * 4294967296) | 0; K[i++] = ((Math.pow(n, 1 / 3) % 1) * 4294967296) | 0; }
+    const l = bytes.length, words = [];
+    for (let i = 0; i < l; i++) words[i >> 2] |= bytes[i] << (24 - (i % 4) * 8);
+    words[l >> 2] |= 0x80 << (24 - (l % 4) * 8);
+    words[((l + 8) >> 6 << 4) + 15] = l * 8;
+    const r = (x, n) => (x >>> n) | (x << (32 - n));
+    for (let j = 0; j < words.length; j += 16) {
+      const w = Array.from({ length: 64 }, (_, i) => i < 16 ? words[j + i] | 0 : 0); let [a, b, c, d, e, f, g, h] = H;
+      for (let i = 0; i < 64; i++) {
+        if (i >= 16) { const x = w[i - 15], y = w[i - 2]; w[i] = (w[i - 16] + (r(x, 7) ^ r(x, 18) ^ (x >>> 3)) + w[i - 7] + (r(y, 17) ^ r(y, 19) ^ (y >>> 10))) | 0; }
+        const t1 = (h + (r(e, 6) ^ r(e, 11) ^ r(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + w[i]) | 0;
+        const t2 = ((r(a, 2) ^ r(a, 13) ^ r(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+        h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+      }
+      [a, b, c, d, e, f, g, h].forEach((v, i) => { H[i] = (H[i] + v) | 0; });
+    }
+    return H.map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
+  }
+  function unlockDialog() {
+    const m = modal('Unlock editing', `<p>Editing is for the product manager. Enter the product team password.</p><label class="lbl" for="ed-pw">Password</label><input id="ed-pw" class="ed-input" type="password" autocomplete="current-password"><p class="small err" id="ed-pw-err" hidden>Wrong password. Try again.</p>`, [
+      { label: 'Cancel' },
+      { label: 'Unlock', cls: 'primary', on: mm => { tryUnlock(mm); return false; } }
+    ]);
+    const inp = m.querySelector('#ed-pw'); inp.focus();
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); tryUnlock(m); } });
+  }
+  async function tryUnlock(m) {
+    const inp = m.querySelector('#ed-pw'), err = m.querySelector('#ed-pw-err');
+    const h = await sha256hex(inp.value);
+    if (h !== ORIGINAL.lock) { err.hidden = false; inp.select(); return; }
+    m.remove(); unlocked = true;
+    try { sessionStorage.setItem(ULKEY, h); } catch (_) {}
+    if (LOCAL) D = LOCAL;
+    editing = true; sel = null; render(); toast('Editing unlocked');
+  }
+  function lockAgain() {
+    if (document.activeElement && document.activeElement.isContentEditable) document.activeElement.blur();
+    unlocked = false; editing = false; sel = null;
+    try { sessionStorage.removeItem(ULKEY); } catch (_) {}
+    LOCAL = changedFromOriginal() ? clone(D) : null; D = clone(ORIGINAL); render();
+    toast(LOCAL ? 'Locked. Your edits are kept in this browser.' : 'Locked');
+  }
+  function passwordDialog() {
+    modal('Change password', `<p>Sets the password for this page. It takes effect in the file you download or publish next.</p><label class="lbl" for="ed-np">New password</label><input id="ed-np" class="ed-input" type="password" autocomplete="new-password"><label class="lbl" for="ed-np2">Type it again</label><input id="ed-np2" class="ed-input" type="password" autocomplete="new-password"><p class="small err" id="ed-np-err" hidden></p>`, [
+      { label: 'Cancel' },
+      { label: 'Remove password', cls: 'danger', on: () => { mutate(() => { D.lock = ''; }); toast('Password removed. Anyone can edit the next version.'); } },
+      { label: 'Set password', cls: 'primary', on: m => {
+        const a = m.querySelector('#ed-np').value, b = m.querySelector('#ed-np2').value, err = m.querySelector('#ed-np-err');
+        if (a.length < 6) { err.textContent = 'Use at least 6 characters.'; err.hidden = false; return false; }
+        if (a !== b) { err.textContent = 'The two passwords do not match.'; err.hidden = false; return false; }
+        sha256hex(a).then(h => { mutate(() => { D.lock = h; }); toast('Password set. Download or publish to apply it.'); m.remove(); });
+        return false;
+      } }
+    ]);
+  }
+
+  // ---------- groups ----------
+  const COLORS = [['core', 'Blue'], ['club', 'Green'], ['join', 'Orange']];
+  function groupsDialog() {
+    const rows = () => D.groups.map((g, i) => {
+      const used = D.flows.filter(f => f.group === g.id).length;
+      return `<div class="grp-row"><input class="ed-input" data-gi="${i}" value="${esc(g.label)}" aria-label="Group name"><select data-gc="${i}" aria-label="Colour">${COLORS.map(([v, l]) => `<option value="${v}"${g.color === v ? ' selected' : ''}>${l}</option>`).join('')}</select><span class="small">${used} flow${used === 1 ? '' : 's'}</span><button data-gd="${i}" class="danger" ${D.groups.length < 2 ? 'disabled' : ''} aria-label="Remove group">×</button></div>`;
+    }).join('');
+    const m = modal('Flow groups', `<p>Groups sort the flows in the contents, for example by user type. Removing a group moves its flows to the first group.</p><div class="grp-list">${rows()}</div><button class="ed-mini" data-gadd type="button">+ Add group</button>`, [{ label: 'Done', cls: 'primary' }]);
+    const list = m.querySelector('.grp-list'), redraw = () => { list.innerHTML = rows(); };
+    m.addEventListener('change', e => {
+      const t = e.target;
+      if (t.dataset.gi != null) { const v = t.value.trim(); if (v) mutate(() => { D.groups[+t.dataset.gi].label = v; }); }
+      if (t.dataset.gc != null) mutate(() => { D.groups[+t.dataset.gc].color = t.value; });
+    });
+    m.addEventListener('click', e => {
+      const d = e.target.closest('[data-gd]');
+      if (d && !d.disabled) { const i = +d.dataset.gd; mutate(() => { const gone = D.groups.splice(i, 1)[0]; D.flows.forEach(f => { if (f.group === gone.id) f.group = D.groups[0].id; }); }); redraw(); }
+      if (e.target.closest('[data-gadd]')) { mutate(() => { D.groups.push({ id: 'g' + Date.now().toString(36), label: 'New group', color: 'core' }); }); redraw(); const ins = list.querySelectorAll('input'); const last = ins[ins.length - 1]; if (last) { last.focus(); last.select(); } }
+    });
+  }
+
+  // A page made from the template gets its own id the first time it is saved, so two products never share browser storage.
+  const slug = s => String(s || 'product').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'product';
+  function outData() {
+    const data = clone(D); data.rev = Date.now(); data.updated = new Date().toISOString();
+    if (ORIGINAL.template) { delete data.template; data.id = slug(D.title) + '-' + Date.now().toString(36); data.file = D.title.replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-') + '-Requirement-Flow'; }
+    else data.id = ORIGINAL.id;
+    return data;
+  }
+
+  function toast(m) { let t = $('#ed-toast'); if (!t) { t = document.createElement('div'); t.id = 'ed-toast'; t.className = 'ed-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); } t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { t.hidden = true; }, 2200); }
+
+  render();
+  if (pending === 'published') setTimeout(() => toast('Published. Everyone with the link now sees this version.'), 300);
+  else if (pending && pending.data) modal('Restore your unpublished edits?', '<p>Someone else published this page while you were editing, so your last publish did not go through. You can put your edits back on top of their version, or keep theirs.</p>', [
+    { label: 'Keep their version', on: () => { try { sessionStorage.removeItem(PKEY); } catch (_) {} } },
+    { label: 'Restore my edits', cls: 'primary', on: () => { try { sessionStorage.removeItem(PKEY); } catch (_) {} snap(); D = pending.data; save(); editing = true; render(); } }
+  ]);
+  if (window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('artifact').then(a => { ART = a || null; if (editing) renderBar(); }).catch(() => {});
+    window.claude.use('downloads').then(d => { DL = d || null; }).catch(() => {});
+  }
+})();
+</script>
+</body>
+</html>
